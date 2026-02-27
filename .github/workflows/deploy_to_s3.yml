@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Debug AWS Secrets Presence
+        run: |
+          echo "AWS_REGION is ${AWS_REGION:+set}"
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
       - name: Checkout Repository
         uses: actions/checkout@v4
 
