@@ -1,17 +1,20 @@
-import React, { createContext, useContext } from 'react';
+
+import React from 'react';
+import { DependencyContext } from './DependencyContextInstance';
 import { InMemoryGameRepository } from '../../infrastructure/repositories/InMemoryGameRepository';
 import { FlipCardUseCase } from '../../core/application/FlipCard';
+import { StartGameUseCase } from '../../core/application/StartGame';
 
-const repo = new InMemoryGameRepository();
-const dependencies = {
-  repository: repo,
-  flipCardUseCase: new FlipCardUseCase(repo)
+
+export const DependencyProvider = ({ children }: { children: React.ReactNode }) => {
+  const repo = new InMemoryGameRepository();
+  const dependencies = {
+    repository: repo,
+    flipCardUseCase: new FlipCardUseCase(repo),
+    startGameUseCase: new StartGameUseCase(repo)
+  };
+  return (
+    <DependencyContext.Provider value={dependencies}>{children}</DependencyContext.Provider>
+  );
 };
 
-const DependencyContext = createContext(dependencies);
-
-export const DependencyProvider = ({ children }: { children: React.ReactNode }) => (
-  <DependencyContext.Provider value={dependencies}>{children}</DependencyContext.Provider>
-);
-
-export const useDependencies = () => useContext(DependencyContext);
