@@ -1,17 +1,16 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useDependencies } from '../context/useDependencies';
 import { useGame } from '../hooks/useGame';
 import { MemoryCard } from '../components/MemoryCard';
 
 export const GameBoard = () => {
-  const { level } = useParams();
+  const [searchParams] = useSearchParams();
+  const level = searchParams.get('level');
   const { startGameUseCase } = useDependencies();
 
   useEffect(() => {
-    
     const parsedLevel = Number(level) || 1;
-
     startGameUseCase.execute(parsedLevel);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level]);
