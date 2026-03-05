@@ -1,11 +1,11 @@
 import './App.css';
 import { DependencyProvider } from './ui/context/DependencyContext';
 import { GameBoard } from './ui/pages/GameBoard';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Modo offline (local) */}
         <Route path="/" element={
@@ -20,7 +20,7 @@ function App() {
           </DependencyProvider>
         } />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
