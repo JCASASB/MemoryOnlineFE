@@ -5,13 +5,22 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <DependencyProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<GameBoard />} />
-        </Routes>
-      </BrowserRouter>
-    </DependencyProvider>
+    <BrowserRouter>
+      <Routes>
+        {/* Modo offline (local) */}
+        <Route path="/" element={
+          <DependencyProvider>
+            <GameBoard />
+          </DependencyProvider>
+        } />
+        {/* Modo online multijugador - URL: /online?level=4&gameId=mi-sala */}
+        <Route path="/online" element={
+          <DependencyProvider online={true}>
+            <GameBoard />
+          </DependencyProvider>
+        } />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
