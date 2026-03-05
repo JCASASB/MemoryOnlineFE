@@ -46,7 +46,6 @@ export const GameBoard = () => {
   return (
     <BoardWrapper>
       <Header>Movimientos: {moves}</Header>
-      https://tu-dominio.com/#/online?level=4&gameId=mi-sala
       <Grid $columns={columns}>
         {cards.map(card => (
           <MemoryCard key={card.id} {...card} flip={stableFlip} />
