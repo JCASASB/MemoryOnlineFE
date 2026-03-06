@@ -20,7 +20,7 @@ function App() {
           </DependencyProvider>
         } />
       </Routes>
-    </HashRouter>
+    </HashRouter> 
   );
 }
 
