@@ -43,5 +43,8 @@ jobs:
 
       # 5. Sincroniza la carpeta generada con el bucket de S3
       - name: Deploy to S3
+        env:
+          BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: |
-          aws s3 sync ./dist s3://${{ secrets.AWS_S3_BUCKET }}/memory --delete
+          BUCKET=$(echo "$BUCKET" | tr -d '[:space:]')
+          aws s3 sync ./dist "s3://${BUCKET}/memory" --delete
