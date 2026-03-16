@@ -13,9 +13,9 @@ export const useGame = () => {
 
   const {
     repository,
-    flipCardUseCase,
-    createGameUseCase,
-    joinGameUseCase,
+    applicationFlipCard,
+    applicationCreateGame,
+    applicationJoinGame,
     getUpdatedStateUseCase,
   } = useDependencies();
 
@@ -44,24 +44,27 @@ export const useGame = () => {
   return {
     stateGame: stateGame,
     flipCardUC: useCallback(
-      (id: string, playerId: string) => flipCardUseCase.execute(id, playerId),
-      [flipCardUseCase],
+      async (id: string, playerId: string) => {
+        const newState = await applicationFlipCard.execute(id, playerId);
+        setStateGame(newState);
+      },
+      [applicationFlipCard],
     ),
     createGameUC: useCallback(
       async (level: number, gameName: string, playerName: string) => {
-        const newState = await createGameUseCase.execute(
+        const newState = await applicationCreateGame.execute(
           level,
           gameName,
           playerName,
         );
         setStateGame(newState);
       },
-      [createGameUseCase],
+      [applicationCreateGame],
     ),
     joinGameUC: useCallback(
       async (gameName: string, playerName: string) =>
-        await joinGameUseCase.execute(gameName, playerName),
-      [joinGameUseCase],
+        await applicationJoinGame.execute(gameName, playerName),
+      [applicationJoinGame],
     ),
   };
 };

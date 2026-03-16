@@ -1,6 +1,6 @@
 import type { GameRepository } from "../domain/repositories/GameRepository";
 
-export class UseCaseJoinGame {
+export class ApplicationJoinGame {
   constructor(private readonly repository: GameRepository) {}
 
   async execute(gameName: string, playerName: string): Promise<void> {

@@ -35,7 +35,7 @@ export class SignalRGameHub implements GameHubPort {
       }
     });
 
-    this.connection.on("logFromServer", (message: string) => {
+    this.connection.on("LogFromServer", (message: string) => {
       console.log(`[SignalR] Log: ${message}`);
     });
 
@@ -46,10 +46,16 @@ export class SignalRGameHub implements GameHubPort {
   }
 
   async sendUpdateStateGame(gameState: GameState): Promise<void> {
-    if (this.connection.state !== signalR.HubConnectionState.Connected) {
-      await this.connect();
-    }
+    console.log(
+      `[SignalR] >>> Enviando updatestate antes:`,
+      JSON.stringify(gameState),
+    );
     const plainState = this.toPlainGameState(gameState);
+
+    console.log(
+      `[SignalR] >>> Enviando updatestate plainstate:`,
+      JSON.stringify(plainState),
+    );
     // Asegúrate de que el nombre coincida con el método en C# (UpdateGameState)
     await this.connection.invoke("UpdateGameState", plainState);
   }
@@ -138,23 +144,42 @@ export class SignalRGameHub implements GameHubPort {
     // Si el servidor envía un string JSON, lo parseamos; si no, usamos el objeto directamente
     const gameState = typeof data === "string" ? JSON.parse(data) : data;
 
-    const cards = (gameState.cards || []).map(
-      (c: any) => new Card(c.id, c.value, c.isFlipped, c.isMatched),
-    );
-    const players = (gameState.players || []).map(
-      (p: any) =>
-        new Player(p.id, p.name, p.remainMoves, p.totalMoves, p.points, p.turn),
+    const rawCards = gameState.cards || gameState.Cards || [];
+    const rawPlayers = gameState.players || gameState.Players || [];
+
+    const cards = rawCards.map(
+      (c: any) =>
+        new Card(
+          c.id || c.Id,
+          c.value || c.Value,
+          c.isRevealed ?? c.IsRevealed,
+          c.isMatched ?? c.IsMatched,
+        ),
     );
 
-    const reconstructed = new Game(
-      gameState.id,
-      gameState.name,
-      gameState.level || "easy",
-      players[0]?.name || "",
+    const players = rawPlayers.map(
+      (p: any) =>
+        new Player(
+          p.id || p.Id,
+          p.name || p.Name,
+          p.remainMoves ?? p.RemainMoves,
+          p.totalMoves ?? p.TotalMoves,
+          p.points ?? p.Points,
+          p.turn ?? p.Turn,
+        ),
     );
+
+    const name = gameState.name || gameState.Name || "";
+    const level = gameState.level ?? gameState.Level ?? 0;
+
+    const reconstructed = new Game(name, level);
+    (reconstructed as any).id =
+      gameState.id || gameState.Id || reconstructed.id;
     reconstructed.cards = cards;
     reconstructed.players = players;
-    reconstructed.isProcessing = gameState.isProcessing;
+    reconstructed.isProcessing = !!(
+      gameState.isProcessing ?? gameState.IsProcessing
+    );
 
     return reconstructed;
   }

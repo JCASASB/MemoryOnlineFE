@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import styled from "styled-components";
 import whichTransitionEventF from "./extra";
 
 interface MemoryCardProps {
@@ -10,12 +10,17 @@ interface MemoryCardProps {
   flip: (id: string) => void;
 }
 
-const CardContainer = styled.div<{ $isFlipped: boolean; $isMatched: boolean; $isAnimating: boolean }>`
+const CardContainer = styled.div<{
+  $isFlipped: boolean;
+  $isMatched: boolean;
+  $isAnimating: boolean;
+}>`
   width: 100%;
   max-width: 160px;
   aspect-ratio: 5 / 7;
   perspective: 1000px;
-  cursor: ${({ $isFlipped, $isMatched, $isAnimating }) => ($isFlipped || $isMatched || $isAnimating ? 'default' : 'pointer')};
+  cursor: ${({ $isFlipped, $isMatched, $isAnimating }) =>
+    $isFlipped || $isMatched || $isAnimating ? "default" : "pointer"};
   opacity: ${({ $isMatched }) => ($isMatched ? 0.5 : 1)};
 
   .card-inner {
@@ -24,7 +29,7 @@ const CardContainer = styled.div<{ $isFlipped: boolean; $isMatched: boolean; $is
     height: 100%;
     transition: transform 0.6s;
     transform-style: preserve-3d;
-    transform: ${({ $isFlipped }) => ($isFlipped ? 'rotateY(180deg)' : 'none')};
+    transform: ${({ $isFlipped }) => ($isFlipped ? "rotateY(180deg)" : "none")};
   }
 
   .card-front,
@@ -52,51 +57,53 @@ const CardContainer = styled.div<{ $isFlipped: boolean; $isMatched: boolean; $is
   }
 `;
 
-export const MemoryCard = memo(({ id, value, isFlipped, isMatched, flip }: MemoryCardProps)  => {
-  
-  console.log("Renderizando carta:", id, "Valor:", value, "Volteada:", isFlipped, "Emparejada:", isMatched);
+export const MemoryCard = memo(
+  ({ id, value, isFlipped, isMatched, flip }: MemoryCardProps) => {
+    //console.log("Renderizando carta:", id, "Valor:", value, "Volteada:", isFlipped, "Emparejada:", isMatched);
 
-  const transitionEvent = whichTransitionEventF();
+    const transitionEvent = whichTransitionEventF();
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-  
-  const startAnimation = useCallback(() => {
-    setIsAnimating(true);
-    console.log('Animación de volteo iniciada para la carta:', id);
-  }, [id]);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isAnimating, setIsAnimating] = useState(false);
 
-  const finishAnimation = useCallback(() => {
-    setIsAnimating(false);
-    console.log('Animación de volteo finalizada para la carta:', id);
-  }, [id]);
+    const startAnimation = useCallback(() => {
+      setIsAnimating(true);
+      console.log("Animación de volteo iniciada para la carta:", id);
+    }, [id]);
 
-  useEffect(() => {
-    const node = containerRef.current;
-    if (transitionEvent && node) {
-      node.addEventListener('transitionstart', startAnimation);
-      node.addEventListener(transitionEvent, finishAnimation);
-    }
+    const finishAnimation = useCallback(() => {
+      setIsAnimating(false);
+      console.log("Animación de volteo finalizada para la carta:", id);
+    }, [id]);
 
-    return () => {
+    useEffect(() => {
+      const node = containerRef.current;
       if (transitionEvent && node) {
-        node.removeEventListener('transitionstart', startAnimation);
-        node.removeEventListener(transitionEvent, finishAnimation);
+        node.addEventListener("transitionstart", startAnimation);
+        node.addEventListener(transitionEvent, finishAnimation);
       }
-    };
-  }, [transitionEvent, startAnimation, finishAnimation]);
 
-  return (
-    <CardContainer 
-      ref={containerRef}
-      $isFlipped={isFlipped}
-      $isMatched={isMatched}
-      $isAnimating={isAnimating}
-      onClick={() => (isFlipped || isAnimating) ? "" : flip(id)}>
-    <div className="card-inner">
-      <div className="card-front">?</div>
-      <div className="card-back">{value}</div>
-    </div>
-  </CardContainer>
-  );
-});
+      return () => {
+        if (transitionEvent && node) {
+          node.removeEventListener("transitionstart", startAnimation);
+          node.removeEventListener(transitionEvent, finishAnimation);
+        }
+      };
+    }, [transitionEvent, startAnimation, finishAnimation]);
+
+    return (
+      <CardContainer
+        ref={containerRef}
+        $isFlipped={isFlipped}
+        $isMatched={isMatched}
+        $isAnimating={isAnimating}
+        onClick={() => (isFlipped || isAnimating ? "" : flip(id))}
+      >
+        <div className="card-inner">
+          <div className="card-front">?</div>
+          <div className="card-back">{value}</div>
+        </div>
+      </CardContainer>
+    );
+  },
+);

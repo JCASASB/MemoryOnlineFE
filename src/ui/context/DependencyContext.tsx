@@ -2,10 +2,12 @@ import React, { useMemo } from "react";
 import { DependencyContext } from "./DependencyContextInstance";
 import type { MemoryContextType } from "./DependencyContextInstance";
 import { OnlineMemoryGameRepository } from "../../infrastructure/repositories/OnlineMemoryGameRepository";
-import { UseCaseFlipCard } from "../../core/application/UseCaseFlipCard";
-import { UseCaseJoinGame } from "../../core/application/UseCaseJoinGame";
-import { UseCaseCreateGame } from "../../core/application/UseCaseCreateGame";
 import { UseCaseGetUpdatedState } from "../../core/application/UseCaseGetUpdatedState";
+import { UseCaseCreateGame } from "../../core/domain/useCases/UseCaseCreateGame";
+import { ApplicationCreateGame } from "../../core/application/ApplicationCreateGame";
+import { ApplicationFlipCard } from "../../core/application/ApplicationFlipCard";
+import { UseCaseFlipCard } from "../../core/domain/useCases/UseCaseFlipCard";
+import { ApplicationJoinGame } from "../../core/application/ApplicationJoinGame";
 
 const SIGNALR_HUB_URL =
   import.meta.env.VITE_SIGNALR_HUB_URL || "http://localhost:5000/gamehub";
@@ -20,9 +22,15 @@ export const DependencyProvider = ({ children }: Props) => {
     const onlineRepo = new OnlineMemoryGameRepository(SIGNALR_HUB_URL);
     return {
       repository: onlineRepo,
-      flipCardUseCase: new UseCaseFlipCard(onlineRepo),
-      createGameUseCase: new UseCaseCreateGame(onlineRepo),
-      joinGameUseCase: new UseCaseJoinGame(onlineRepo),
+      applicationFlipCard: new ApplicationFlipCard(
+        onlineRepo,
+        new UseCaseFlipCard(),
+      ),
+      applicationCreateGame: new ApplicationCreateGame(
+        onlineRepo,
+        new UseCaseCreateGame(),
+      ),
+      applicationJoinGame: new ApplicationJoinGame(onlineRepo),
       getUpdatedStateUseCase: new UseCaseGetUpdatedState(onlineRepo),
       onlineRepository: onlineRepo,
     };

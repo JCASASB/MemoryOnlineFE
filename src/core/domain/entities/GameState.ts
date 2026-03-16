@@ -5,8 +5,7 @@ export interface GameState {
   id: string;
   name: string;
   level: number;
-  cards: Card[];
   isProcessing: boolean;
+  cards: Card[];
   players: Player[];
-  canClick(playerId: string): boolean;
 }
