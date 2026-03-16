@@ -13,24 +13,29 @@ export class OnlineMemoryGameRepository implements GameRepository {
   private version: number = 0;
   private hub: SignalRGameHub;
 
-  constructor(hubUrl: string) {
-    this.hub = new SignalRGameHub(hubUrl);
+  constructor(hubOrUrl: string | SignalRGameHub) {
+    if (typeof hubOrUrl === "string") {
+      this.hub = new SignalRGameHub(hubOrUrl);
+    } else {
+      this.hub = hubOrUrl;
+    }
   }
 
   // ─── Conexión al hub ───────────────────────────────────────
 
   /** Conecta al hub y registra los listeners de eventos remotos */
   async connect(): Promise<void> {
-    await this.hub.connect();
-    // Cuando el otro jugador envía el estado completo, aplicarlo localmente
+    // Registrar callbacks antes de conectar para no perder mensajes inmediatos
     this.hub.onRemoteGameStateUpdated((gameState: GameState) => {
       console.log(
         `this.hub.onRemoteGameStateUpdated con ${JSON.stringify(gameState, null, 2)}`,
       );
       this.save(gameState);
-      this.version++;
       this.listeners.forEach((l) => l());
     });
+
+    // Iniciar la conexión
+    await this.hub.connect();
   }
 
   /** Desconecta del hub y limpia los listeners */
@@ -45,7 +50,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
       const state = JSON.parse(stored);
       return state;
     } else {
-      return {};
+      return {} as GameState;
     }
   };
 
@@ -63,7 +68,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
   };
 
   // Permite a useGame leer la versión para forzar actualización si es necesario
-  getVersion = (): number => this.version;
+  // (ya definido arriba)
 
   // ─── Acciones online (envío al hub) ────────────────────────
 

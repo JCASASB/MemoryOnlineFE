@@ -7,16 +7,20 @@ export class Game implements GameState {
   public cards: Card[] = [];
   public players: Player[] = [];
   public isProcessing: boolean = false;
+  public readonly id: string;
 
   constructor(
-    public readonly id: string,
     public readonly name: string,
     public readonly level: number,
-    playerName: string,
   ) {
-    // Crear jugador principal automáticamente
-    const player = new Player(uuidv4(), playerName, 2, 0, 0, true);
-    this.players = [player];
+    this.id = uuidv4();
+  }
+
+  addPlayer(playerName: string): Game {
+    const newPlayer = new Player(uuidv4(), playerName, 2, 0, 0, false);
+    return this.cloneAndOverride({
+      players: [...this.players, newPlayer],
+    });
   }
 
   canClick(playerId: string): boolean {

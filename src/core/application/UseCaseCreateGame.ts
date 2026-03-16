@@ -11,12 +11,16 @@ export class UseCaseCreateGame {
     gameName: string,
     playerName: string,
   ): Promise<GameState> {
-    const gameId = uuidv4();
-    const game = new Game(gameId, gameName, level, playerName);
-
     await this.repository.connect();
 
+    const game = new Game(gameName, level);
+
+    game.addPlayer(playerName);
+
+    console.log(`[Sigtes:`, JSON.stringify(game));
+
     this.repository.save(game);
+
     await this.repository.createGameToServer(game);
 
     return game;

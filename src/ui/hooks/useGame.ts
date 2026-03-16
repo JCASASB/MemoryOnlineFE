@@ -9,9 +9,7 @@ import type { GameState } from "../../core/domain/entities/GameState";
  *   la diferencia está en la implementación del repositorio inyectado.
  */
 export const useGame = () => {
-  const [stateGame, setStateGame] = useState<GameState>(
-    new Game("", "", 0, ""),
-  );
+  const [stateGame, setStateGame] = useState<GameState>(new Game("", 0, ""));
 
   const {
     repository,
