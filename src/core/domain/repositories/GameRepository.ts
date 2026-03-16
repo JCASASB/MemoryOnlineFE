@@ -1,8 +1,10 @@
+import type { Game } from "../entities/Game";
 import type { GameState } from "../entities/GameState";
 
 export interface GameRepository {
   save(state: GameState): void;
   getState(): GameState;
+  getGame(): Game;
   getVersion(): number;
   subscribe(listener: () => void): () => void;
   connect(): void;

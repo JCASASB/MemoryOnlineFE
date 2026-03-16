@@ -44,6 +44,16 @@ export class SignalRGameHub implements GameHubPort {
   async disconnect(): Promise<void> {
     await this.connection.stop();
   }
+
+  async sendUpdateStateGame(gameState: GameState): Promise<void> {
+    if (this.connection.state !== signalR.HubConnectionState.Connected) {
+      await this.connect();
+    }
+    const plainState = this.toPlainGameState(gameState);
+    // Asegúrate de que el nombre coincida con el método en C# (UpdateGameState)
+    await this.connection.invoke("UpdateGameState", plainState);
+  }
+
   async sendCreateGame(gameState: GameState): Promise<void> {
     console.log(
       `[SignalR] >>> Enviando CreateGame antes:`,
@@ -95,15 +105,6 @@ export class SignalRGameHub implements GameHubPort {
 
   onRemoteGameStateUpdated(callback: (gameState: GameState) => void): void {
     this.onGameStateUpdatedCallback = callback;
-  }
-
-  async sendUpdateStateGame(gameState: GameState): Promise<void> {
-    if (this.connection.state !== signalR.HubConnectionState.Connected) {
-      await this.connect();
-    }
-    const plainState = this.toPlainGameState(gameState);
-    // Asegúrate de que el nombre coincida con el método en C# (UpdateGameState)
-    await this.connection.invoke("UpdateGameState", plainState);
   }
 
   // ... (Resto de métodos sendCreateGame, sendJoinGame, disconnect se mantienen igual)

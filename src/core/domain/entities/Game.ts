@@ -21,9 +21,15 @@ export class Game implements GameState {
     this.players.push(newPlayer);
   }
 
-  canClick(playerId: string): boolean {
+  canClick(playerName: string): boolean {
+    console.log(
+      `[Game.canClick] Verificando si el jugador ${playerName} puede hacer clic...`,
+    );
+    console.log(
+      `[Game.canClick] Estado actual del juego: ${JSON.stringify(this, null, 2)}`,
+    );
     return (
-      this.players.some((p) => p.id === playerId && p.turn) &&
+      this.players.some((p) => p.name === playerName && p.turn) &&
       !this.isProcessing
     );
   }

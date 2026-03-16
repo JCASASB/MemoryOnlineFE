@@ -8,4 +8,5 @@ export interface GameState {
   cards: Card[];
   isProcessing: boolean;
   players: Player[];
+  canClick(playerId: string): boolean;
 }
