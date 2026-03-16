@@ -16,11 +16,9 @@ export class Game implements GameState {
     this.id = uuidv4();
   }
 
-  addPlayer(playerName: string): Game {
+  addPlayer(playerName: string): void {
     const newPlayer = new Player(uuidv4(), playerName, 2, 0, 0, false);
-    return this.cloneAndOverride({
-      players: [...this.players, newPlayer],
-    });
+    this.players.push(newPlayer);
   }
 
   canClick(playerId: string): boolean {
@@ -30,26 +28,24 @@ export class Game implements GameState {
     );
   }
 
-  flipCard(cardId: string): Game {
-    if (this.isProcessing) return this;
+  flipCard(cardId: string): void {
+    if (this.isProcessing) return;
 
     const card = this.cards.find((c) => c.id === cardId);
-    if (!card || card.isFlipped || card.isMatched) return this;
+    if (!card || card.isFlipped || card.isMatched) return;
 
     const newCards = this.cards.map((c) => (c.id === cardId ? c.flip() : c));
     const flippedCount = newCards.filter(
       (c) => c.isFlipped && !c.isMatched,
     ).length;
 
-    return this.cloneAndOverride({
-      cards: newCards,
-      isProcessing: flippedCount === 2,
-    });
+    this.cards = newCards;
+    this.isProcessing = flippedCount === 2;
   }
 
-  checkMatch(): Game {
+  checkMatch(): void {
     const flipped = this.cards.filter((c) => c.isFlipped && !c.isMatched);
-    if (flipped.length !== 2) return this;
+    if (flipped.length !== 2) return;
 
     const isMatch = flipped[0].value === flipped[1].value;
     const finalCards = this.cards.map((c) => {
@@ -59,40 +55,8 @@ export class Game implements GameState {
       return c;
     });
 
-    return this.cloneAndOverride({
-      cards: finalCards,
-      isProcessing: false,
-    });
-  }
-
-  cloneAndOverride(toOverride: Partial<GameState>): Game {
-    // Lista de campos válidos en GameState
-    const validFields = ["id", "name", "cards", "players", "isProcessing"];
-    Object.keys(toOverride).forEach((key) => {
-      if (!validFields.includes(key)) {
-        console.warn(
-          `[Game.cloneAndOverride] Campo desconocido ignorado: ${key}`,
-        );
-      }
-    });
-    const id = toOverride.id !== undefined ? toOverride.id : this.id;
-    const name = toOverride.name !== undefined ? toOverride.name : this.name;
-    const cardsRaw =
-      toOverride.cards !== undefined ? toOverride.cards : this.cards;
-    const cards = cardsRaw.map(
-      (c: Card) => new Card(c.id, c.value, c.isFlipped, c.isMatched),
-    );
-    const players =
-      toOverride.players !== undefined ? toOverride.players : this.players;
-    const isProcessing =
-      toOverride.isProcessing !== undefined
-        ? toOverride.isProcessing
-        : this.isProcessing;
-    const game = new Game(id, name, this.level, this.players[0]?.name || "");
-    game.cards = cards;
-    game.players = players;
-    game.isProcessing = isProcessing;
-    return game;
+    this.cards = finalCards;
+    this.isProcessing = false;
   }
 
   /**
@@ -111,7 +75,6 @@ export class Game implements GameState {
       .sort((a, b) => a.sort - b.sort)
       .map((item) => new Card(uuidv4(), item.value));
 
-    // Asignar cartas y estado inicial
     this.cards = shuffled;
     this.isProcessing = false;
   }

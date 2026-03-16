@@ -113,6 +113,7 @@ export class SignalRGameHub implements GameHubPort {
       Id: gameState.id,
       Name: gameState.name,
       IsProcessing: gameState.isProcessing,
+      Level: gameState.level,
       Cards:
         gameState.cards?.map((c) => ({
           Id: c.id,
