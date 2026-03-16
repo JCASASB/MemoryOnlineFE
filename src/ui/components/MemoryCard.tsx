@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import whichTransitionEventF from "./extra";
+import { useGame } from "../hooks/useGame";
 
 interface MemoryCardProps {
   id: string;
@@ -60,6 +61,7 @@ const CardContainer = styled.div<{
 export const MemoryCard = memo(
   ({ id, value, isFlipped, isMatched, flip }: MemoryCardProps) => {
     //console.log("Renderizando carta:", id, "Valor:", value, "Volteada:", isFlipped, "Emparejada:", isMatched);
+    const { checkCardsUC } = useGame();
 
     const transitionEvent = whichTransitionEventF();
 
@@ -73,8 +75,8 @@ export const MemoryCard = memo(
 
     const finishAnimation = useCallback(() => {
       setIsAnimating(false);
-      console.log("Animación de volteo finalizada para la carta:", id);
-    }, [id]);
+      checkCardsUC();
+    }, [id, checkCardsUC]);
 
     useEffect(() => {
       const node = containerRef.current;

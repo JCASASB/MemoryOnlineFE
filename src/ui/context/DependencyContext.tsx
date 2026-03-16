@@ -8,6 +8,8 @@ import { ApplicationCreateGame } from "../../core/application/ApplicationCreateG
 import { ApplicationFlipCard } from "../../core/application/ApplicationFlipCard";
 import { UseCaseFlipCard } from "../../core/domain/useCases/UseCaseFlipCard";
 import { ApplicationJoinGame } from "../../core/application/ApplicationJoinGame";
+import { ApplicationCheckCards } from "../../core/application/ApplicationCheckCards";
+import { UseCaseCheckCards } from "../../core/domain/useCases/UseCaseCheckCards";
 
 const SIGNALR_HUB_URL =
   import.meta.env.VITE_SIGNALR_HUB_URL || "http://localhost:5000/gamehub";
@@ -30,6 +32,11 @@ export const DependencyProvider = ({ children }: Props) => {
         onlineRepo,
         new UseCaseCreateGame(),
       ),
+      applicationCheckCards: new ApplicationCheckCards(
+        onlineRepo,
+        new UseCaseCheckCards(),
+      ),
+
       applicationJoinGame: new ApplicationJoinGame(onlineRepo),
       getUpdatedStateUseCase: new UseCaseGetUpdatedState(onlineRepo),
       onlineRepository: onlineRepo,

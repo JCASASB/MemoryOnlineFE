@@ -9,13 +9,14 @@ import type { GameState } from "../../core/domain/entities/GameState";
  *   la diferencia está en la implementación del repositorio inyectado.
  */
 export const useGame = () => {
-  const [stateGame, setStateGame] = useState<GameState>(new Game("", 0, ""));
+  const [stateGame, setStateGame] = useState<GameState>(new Game("", "", 0));
 
   const {
     repository,
     applicationFlipCard,
     applicationCreateGame,
     applicationJoinGame,
+    applicationCheckCards,
     getUpdatedStateUseCase,
   } = useDependencies();
 
@@ -66,5 +67,9 @@ export const useGame = () => {
         await applicationJoinGame.execute(gameName, playerName),
       [applicationJoinGame],
     ),
+    checkCardsUC: useCallback(async () => {
+      const newState = await applicationCheckCards.execute();
+      setStateGame(newState);
+    }, [applicationCheckCards]),
   };
 };

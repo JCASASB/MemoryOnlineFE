@@ -169,12 +169,11 @@ export class SignalRGameHub implements GameHubPort {
         ),
     );
 
+    const id = gameState.id || gameState.Id || "";
     const name = gameState.name || gameState.Name || "";
     const level = gameState.level ?? gameState.Level ?? 0;
 
-    const reconstructed = new Game(name, level);
-    (reconstructed as any).id =
-      gameState.id || gameState.Id || reconstructed.id;
+    const reconstructed = new Game(id, name, level);
     reconstructed.cards = cards;
     reconstructed.players = players;
     reconstructed.isProcessing = !!(

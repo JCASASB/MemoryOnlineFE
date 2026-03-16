@@ -1,9 +1,7 @@
 import type { GameRepository } from "../../core/domain/repositories/GameRepository";
 import { SignalRGameHub } from "../signalr/SignalRGameHub";
 import type { GameState } from "../../core/domain/entities/GameState";
-import { Game } from "../../core/domain/entities/Game";
-import { Card } from "../../core/domain/entities/Card";
-import { Player } from "../../core/domain/entities/Player";
+import type { Card } from "../../core/domain/entities/Card";
 
 /**
  * Repositorio online que implementa GameRepository.
@@ -23,41 +21,6 @@ export class OnlineMemoryGameRepository implements GameRepository {
       this.hub = hubOrUrl;
     }
   }
-  getGame(): Game {
-    const state = this.getState();
-    // Si no hay estado, devolver un Game vacío
-    if (!state || !state.name) {
-      const empty = new Game("", 0);
-      return empty;
-    }
-
-    const game = new Game(state.name, state.level || 0);
-    // sobrescribir id (readonly) para mantener consistencia con el estado almacenado
-    (game as any).id = state.id;
-
-    // Reconstruir cartas y jugadores
-    game.cards = Array.isArray(state.cards)
-      ? state.cards.map(
-          (c: any) => new Card(c.id, c.value, c.isFlipped, c.isMatched),
-        )
-      : [];
-    game.players = Array.isArray(state.players)
-      ? state.players.map(
-          (p: any) =>
-            new Player(
-              p.id,
-              p.name,
-              p.remainMoves,
-              p.totalMoves,
-              p.points,
-              p.turn,
-            ),
-        )
-      : [];
-    game.isProcessing = !!state.isProcessing;
-
-    return game;
-  }
 
   // ─── Conexión al hub ───────────────────────────────────────
 
@@ -66,7 +29,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
     // Registrar callbacks antes de conectar para no perder mensajes inmediatos
     this.hub.onRemoteGameStateUpdated((gameState: GameState) => {
       console.log(
-        `this.hub.onRemoteGameStateUpdated con ${JSON.stringify(gameState, null, 2)}`,
+        `this.hub.onRemoteGameStateUpdated con ${JSON.stringify(gameState)}`,
       );
       this.save(gameState);
       this.listeners.forEach((l) => l());
@@ -86,7 +49,8 @@ export class OnlineMemoryGameRepository implements GameRepository {
     const stored = localStorage.getItem("memory-game-state");
     if (stored) {
       const state = JSON.parse(stored);
-      return state;
+      return state as GameState;
+      //  return this.normalizeState(state);
     } else {
       return {} as GameState;
     }

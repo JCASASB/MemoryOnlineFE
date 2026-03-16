@@ -31,8 +31,8 @@ export function cloneAndOverride(
       : gameObj.isProcessing;
 
   // Crear nueva instancia y preservar id
-  const newGame = new Game(name, (gameObj as any).level);
-  (newGame as any).id = id;
+  const level = (gameObj as any).level ?? 0;
+  const newGame = new Game(id || "", name, level);
 
   newGame.cards = cards;
   newGame.players = players;
