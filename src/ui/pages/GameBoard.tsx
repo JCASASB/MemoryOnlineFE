@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import styled from 'styled-components';
-import { useGame } from '../hooks/useGame';
-import { MemoryCard } from '../components/MemoryCard';
+import { useCallback, useEffect, useMemo } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { useGame } from "../hooks/useGame";
+import { usePlayer } from "../hooks/usePlayer";
+import { MemoryCard } from "../components/MemoryCard";
+import { ScoreBoard } from "../components/scoreBoard/ScoreBoard";
 
 const BoardWrapper = styled.div`
   display: flex;
@@ -29,25 +31,40 @@ const Grid = styled.div<{ $columns: number }>`
 
 export const GameBoard = () => {
   const [searchParams] = useSearchParams();
-  const level = searchParams.get('level');
-  const gameId = searchParams.get('gameId') || undefined;
 
-  const { cards, moves, flip, startGame } = useGame(gameId);
+  const navigate = useNavigate();
+  const level = searchParams.get("level") || "0";
+  const gameId = searchParams.get("gameId") || "default-offline-game";
+  const { playerName } = usePlayer();
 
+  // Si no hay nombre, redirigir al login con la URL actual como "next"
   useEffect(() => {
-    const parsedLevel = Number(level) || 1;
-    startGame(parsedLevel);
-  }, [level, startGame]);
+    if (!playerName) {
+      const next = encodeURIComponent(
+        window.location.hash.replace("#", "") || "/",
+      );
+      navigate(`/login?next=${next}`);
+    }
+  }, [playerName, navigate]);
 
-  const stableFlip = useCallback((id: string) => flip(id), [flip]);
+  const { stateGame, flipCardUC } = useGame();
 
-  const columns = useMemo(() => Math.ceil(Math.sqrt(cards.length)), [cards.length]);
+  const stableFlip = useCallback(
+    (id: string) => flipCardUC(id, playerName),
+    [flipCardUC, playerName],
+  );
+
+  const columns = useMemo(
+    () => Math.ceil(Math.sqrt(stateGame.cards.length)),
+    [stateGame.cards.length],
+  );
 
   return (
     <BoardWrapper>
-      <Header>Movimientos: {moves}</Header>
+      <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
+      {stateGame.players.length < 2 && <Header>Esperando jugador...</Header>}
       <Grid $columns={columns}>
-        {cards.map(card => (
+        {stateGame.cards.map((card) => (
           <MemoryCard key={card.id} {...card} flip={stableFlip} />
         ))}
       </Grid>

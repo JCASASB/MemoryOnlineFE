@@ -1,7 +1,6 @@
-import type { GameRepository } from '../../core/domain/repositories/GameRepository';
-import type { GameHubPort, CardDto } from '../../core/domain/ports/GameHubPort';
-import type { GameState } from '../../core/domain/entities/GameState';
-import { Card } from '../../core/domain/entities/Card';
+import type { GameRepository } from "../../core/domain/repositories/GameRepository";
+import { SignalRGameHub } from "../signalr/SignalRGameHub";
+import type { GameState } from "../../core/domain/entities/GameState";
 
 /**
  * Repositorio online que implementa GameRepository.
@@ -10,47 +9,27 @@ import { Card } from '../../core/domain/entities/Card';
  * con otros jugadores en tiempo real.
  */
 export class OnlineMemoryGameRepository implements GameRepository {
-
-  private state: GameState;
   private listeners: Set<() => void> = new Set();
+  private version: number = 0;
+  private hub: SignalRGameHub;
 
-  constructor(private readonly hub: GameHubPort) {
-    this.state = {
-      cards: [],
-      moves: 0,
-      isProcessing: false,
-    };
+  constructor(hubUrl: string) {
+    this.hub = new SignalRGameHub(hubUrl);
   }
 
   // ─── Conexión al hub ───────────────────────────────────────
 
   /** Conecta al hub y registra los listeners de eventos remotos */
-  async connect(gameId: string): Promise<void> {
-    await this.hub.connect(gameId);
-
-    // Cuando el otro jugador voltea una carta, aplicar localmente
-    this.hub.onRemoteFlipCard((cardId: string) => {
-      console.log('[OnlineRepo] Acción remota recibida: FlipCard', cardId);
-      const card = this.state.cards.find(c => c.id === cardId);
-      if (card && !card.isFlipped && !card.isMatched) {
-        const updatedCards = this.state.cards.map(c =>
-          c.id === cardId ? c.flip() : c
-        );
-        this.save({ ...this.state, cards: updatedCards });
-      }
-    });
-
-    // Cuando se inicia una partida remota, sincronizar las cartas
-    this.hub.onRemoteStartGame((_level: number, remoteCards: CardDto[]) => {
-      console.log('[OnlineRepo] Partida remota iniciada con', remoteCards.length, 'cartas');
-      const newCards = remoteCards.map(
-        c => new Card(c.id, c.value, c.isFlipped, c.isMatched)
+  async connect(): Promise<void> {
+    await this.hub.connect();
+    // Cuando el otro jugador envía el estado completo, aplicarlo localmente
+    this.hub.onRemoteGameStateUpdated((gameState: GameState) => {
+      console.log(
+        `this.hub.onRemoteGameStateUpdated con ${JSON.stringify(gameState, null, 2)}`,
       );
-      this.save({ cards: newCards, moves: 0, isProcessing: false });
-    });
-
-    this.hub.onPlayerJoined((playerId: string) => {
-      console.log('[OnlineRepo] Jugador conectado:', playerId);
+      this.save(gameState);
+      this.version++;
+      this.listeners.forEach((l) => l());
     });
   }
 
@@ -60,32 +39,22 @@ export class OnlineMemoryGameRepository implements GameRepository {
     await this.hub.disconnect();
   }
 
-  // ─── Implementación de GameRepository ──────────────────────
+  getState = (): GameState => {
+    const stored = localStorage.getItem("memory-game-state");
+    if (stored) {
+      const state = JSON.parse(stored);
+      return state;
+    } else {
+      return {};
+    }
+  };
 
-  setLevel(level: number): void {
-    const selectedValues = Array.from(
-      { length: level - 1 },
-      (_, i) => (i + 1).toString()
-    );
-    const values = [...selectedValues, ...selectedValues];
-
-    this.state = {
-      cards: values
-        .sort(() => Math.random() - 0.5)
-        .map((v, i) => new Card(i.toString(), v)),
-      moves: 0,
-      isProcessing: false,
-    };
-
-    // Notificar a los listeners locales
-    this.listeners.forEach(l => l());
-  }
-
-  getState = (): GameState => this.state;
+  getVersion = (): number => this.version;
 
   save(state: GameState): void {
-    this.state = state;
-    this.listeners.forEach(l => l());
+    localStorage.setItem("memory-game-state", JSON.stringify(state));
+    this.version++;
+    this.listeners.forEach((l) => l());
   }
 
   subscribe = (listener: () => void): (() => void) => {
@@ -93,15 +62,21 @@ export class OnlineMemoryGameRepository implements GameRepository {
     return () => this.listeners.delete(listener);
   };
 
+  // Permite a useGame leer la versión para forzar actualización si es necesario
+  getVersion = (): number => this.version;
+
   // ─── Acciones online (envío al hub) ────────────────────────
 
-  /** Envía al servidor la acción de voltear carta */
-  async sendFlipCard(cardId: string): Promise<void> {
-    await this.hub.sendFlipCard(cardId);
+  /** Implementa CreateGame de GameRepository */
+  async createGameToServer(state: GameState): Promise<void> {
+    await this.hub.sendCreateGame(state);
   }
 
-  /** Envía al servidor la acción de iniciar partida */
-  async sendStartGame(level: number): Promise<void> {
-    await this.hub.sendStartGame(level);
+  async joinGameToServer(gameId: string, playerName: string): Promise<void> {
+    await this.hub.sendJoinGame(gameId, playerName);
+  }
+
+  async updateStateToServer(state: GameState): Promise<void> {
+    await this.hub.sendUpdateStateGame(state);
   }
 }
