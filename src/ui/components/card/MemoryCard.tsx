@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import whichTransitionEventF from "../extra";
+import whichTransitionEventF from "./extra";
 import { useGame } from "../../hooks/useGame";
 
 interface MemoryCardProps {
