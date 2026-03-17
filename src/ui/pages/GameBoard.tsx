@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useGame } from "../hooks/useGame";
