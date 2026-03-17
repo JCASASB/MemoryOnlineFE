@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../hooks/usePlayer";
 import { useGame } from "../hooks/useGame";
@@ -60,21 +60,46 @@ const Button = styled.button`
 
 export const JoinGame = () => {
   const { playerName, savePlayerName } = usePlayer();
-  const [sala, setSala] = useState("");
+  const location = useLocation();
+  const initialSala = useMemo(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      return params.get("gameName") || "";
+    } catch (e) {
+      return "";
+    }
+  }, [location.search]);
+
+  const [sala, setSala] = useState(initialSala);
   const [usuario, setUsuario] = useState(playerName);
   const navigate = useNavigate();
   const { joinGameUC } = useGame();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedSala = sala.trim();
     const trimmedUsuario = usuario.trim();
+    console.debug("JoinGame.handleSubmit called", {
+      trimmedSala,
+      trimmedUsuario,
+    });
     if (!trimmedSala || !trimmedUsuario) return;
 
-    await joinGameUC(trimmedSala, trimmedUsuario);
+    // Guardar nombre localmente y navegar de inmediato.
     savePlayerName(trimmedUsuario);
+
     try {
-      navigate(`/online?gameId=${encodeURIComponent(trimmedSala)}`);
+      console.debug("Navigating to online", trimmedSala);
+      navigate(`/online?gameName=${encodeURIComponent(trimmedSala)}`);
+      console.debug("Navigation requested");
+
+      // Ejecutar join después de la navegación en un tick para evitar que
+      // la llamada al hub ocurra antes de que la ruta cambie.
+      setTimeout(() => {
+        joinGameUC(trimmedSala, trimmedUsuario).catch((err) =>
+          console.error("Error joining game:", err),
+        );
+      }, 50);
     } catch (err) {
       alert(
         "Error al unirse a la sala: " +

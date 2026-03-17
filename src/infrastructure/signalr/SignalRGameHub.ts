@@ -7,7 +7,7 @@ import { Game } from "../../core/domain/entities/Game";
 
 export class SignalRGameHub implements GameHubPort {
   private connection: signalR.HubConnection;
-  // gameId is unused currently; keep if needed later
+  // gameName is unused currently; keep if needed later
 
   // Handlers para evitar el error de "método no encontrado"
   private onGameStateUpdatedCallback?: (gameStateJson: string) => void;
@@ -25,6 +25,15 @@ export class SignalRGameHub implements GameHubPort {
     this.connection.on("cardFlipped", (cardId: string) => {
       console.log(`[SignalR] <<< Recibido cardFlipped: ${cardId}`);
       if (this.onCardFlippedCallback) this.onCardFlippedCallback(cardId);
+    });
+
+    // Manejar invocaciones del servidor a un método 'error' si las hay
+    this.connection.on("error", (message: any) => {
+      console.error("[SignalR] Server error:", message);
+    });
+    // Algunos servidores podrían llamar con mayúscula
+    this.connection.on("Error", (message: any) => {
+      console.error("[SignalR] Server Error:", message);
     });
 
     this.connection.on("GameStateUpdated", (gameStateString: string) => {
@@ -170,7 +179,9 @@ export class SignalRGameHub implements GameHubPort {
     this.onGameStateUpdatedCallback = undefined;
     this.onCardFlippedCallback = undefined;
     // Si quieres dejar de escuchar físicamente:
-    this.connection.off("gameStateUpdated");
+    this.connection.off("GameStateUpdated");
     this.connection.off("cardFlipped");
+    this.connection.off("error");
+    this.connection.off("Error");
   }
 }

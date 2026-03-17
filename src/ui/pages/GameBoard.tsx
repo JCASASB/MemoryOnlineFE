@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useGame } from "../hooks/useGame";
 import { usePlayer } from "../hooks/usePlayer";
-import { MemoryCard } from "../components/MemoryCard";
+import { MemoryCard } from "../components/card/MemoryCard";
 import { ScoreBoard } from "../components/scoreBoard/ScoreBoard";
+import { LinkShare } from "../components/linkShare/LinkShare";
 
 const BoardWrapper = styled.div`
   display: flex;
@@ -58,7 +60,12 @@ export const GameBoard = () => {
   return (
     <BoardWrapper>
       <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
-      {stateGame.players.length < 2 && <Header>Esperando jugador...</Header>}
+      {stateGame.players.length < 2 && (
+        <>
+          <Header>Esperando jugador...</Header>
+          <LinkShare />
+        </>
+      )}
       <Grid $columns={columns}>
         {stateGame.cards.map((card) => (
           <MemoryCard key={card.id} {...card} flip={stableFlip} />

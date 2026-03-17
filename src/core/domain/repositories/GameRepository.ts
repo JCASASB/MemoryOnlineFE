@@ -7,6 +7,6 @@ export interface GameRepository {
   subscribe(listener: () => void): () => void;
   connectHub(): void;
   updateStateToServer(state: GameState): Promise<void>;
-  joinGameToServer(gameId: string, playerName: string): Promise<void>;
+  joinGameToServer(gameName: string, playerName: string): Promise<void>;
   createGameToServer(state: GameState): Promise<void>;
 }
