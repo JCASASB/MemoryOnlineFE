@@ -76,8 +76,9 @@ export const MemoryCard = memo(
 
     const finishAnimation = useCallback(() => {
       setIsAnimating(false);
+      console.log("Animación de volteo finalizada para la carta:");
       checkCardsUC();
-    }, [id, checkCardsUC]);
+    }, [checkCardsUC]);
 
     useEffect(() => {
       const node = containerRef.current;

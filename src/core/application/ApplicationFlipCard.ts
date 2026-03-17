@@ -13,10 +13,13 @@ export class ApplicationFlipCard {
 
     const gameState = this.useCase.execute(state, cardId, playerName);
 
-    this.repository.save(gameState);
+    if (gameState) {
+      this.repository.save(gameState);
 
-    await this.repository.updateStateToServer(gameState);
-
-    return gameState;
+      await this.repository.updateStateToServer(gameState);
+      return gameState;
+    } else {
+      return state;
+    }
   }
 }

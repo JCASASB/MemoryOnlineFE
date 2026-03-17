@@ -24,15 +24,8 @@ export class OnlineMemoryGameRepository implements GameRepository {
   async connectHub(): Promise<void> {
     // Registrar callbacks antes de conectar para no perder mensajes inmediatos
     this.hub.onRemoteGameStateUpdated((gameStateJson: string) => {
-      console.log(
-        "[OnlineMemoryGameRepository] Recibido GameStateUpdated del hub:",
-        gameStateJson,
-      );
       const reconstructed = this.convertJsonGameStateToObject(gameStateJson);
-      console.log(
-        "[OnlineMemoryGameRepository] Recibido GameStateUpdated del hub reconstruido:",
-        reconstructed,
-      );
+
       this.save(reconstructed);
     });
 
