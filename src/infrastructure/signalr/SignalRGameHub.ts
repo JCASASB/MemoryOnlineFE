@@ -7,7 +7,7 @@ import { Game } from "../../core/domain/entities/Game";
 
 export class SignalRGameHub implements GameHubPort {
   private connection: signalR.HubConnection;
-  // gameId is unused currently; keep if needed later
+  // gameName is unused currently; keep if needed later
 
   // Handlers para evitar el error de "método no encontrado"
   private onGameStateUpdatedCallback?: (gameStateJson: string) => void;

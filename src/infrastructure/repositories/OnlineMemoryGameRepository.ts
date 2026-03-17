@@ -73,8 +73,8 @@ export class OnlineMemoryGameRepository implements GameRepository {
     await this.hub.sendCreateGame(state);
   }
 
-  async joinGameToServer(gameId: string, playerName: string): Promise<void> {
-    await this.hub.sendJoinGame(gameId, playerName);
+  async joinGameToServer(gameName: string, playerName: string): Promise<void> {
+    await this.hub.sendJoinGame(gameName, playerName);
   }
 
   async updateStateToServer(state: GameState): Promise<void> {

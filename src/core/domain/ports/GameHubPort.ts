@@ -10,7 +10,7 @@ export interface GameHubPort {
 
   // Enviar acciones al servidor
   sendCreateGame(gameState: GameState): Promise<void>;
-  sendJoinGame(gameId: string, playerName: string): Promise<void>;
+  sendJoinGame(gameName: string, playerName: string): Promise<void>;
   sendUpdateStateGame(gameState: GameState): Promise<void>;
 
   // Escuchar acciones remotas
