@@ -92,7 +92,7 @@ export const CreateGame = () => {
     }
 
     navigate(
-      `/online?level=${nivel}&gameId=${encodeURIComponent(trimmedSala)}`,
+      `/online?level=${nivel}&gameName=${encodeURIComponent(trimmedSala)}`,
     );
   };
 
