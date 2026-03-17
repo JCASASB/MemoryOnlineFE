@@ -4,16 +4,17 @@ import { Player } from "../entities/Player";
 
 export class UseCaseFlipCard {
   execute(gameState: GameState, cardId: string, playerName: string): GameState {
-    console.log(`[UseCaseFlipCard] Estado actual ds:`, playerName);
-    console.log(`[UseCaseFlipCard] Estado actual d:`, gameState);
+    // console.log(`[UseCaseFlipCard] Estado actual ds:`, playerName);
+    //  console.log(`[UseCaseFlipCard] Estado actual d:`, gameState);
     if (this.canClick(gameState, cardId, playerName)) {
       let newState = this.flipCard(gameState, cardId, playerName);
 
-      if (newState.cards.filter((c) => c.isRevealed === true).length === 2) {
-        newState = this.checkMatch(newState);
+      const revealedIdCards = this.getIdCardsRevealedAndNotMatched(newState);
+      if (revealedIdCards.length === 2) {
+        newState = this.checkMatch(newState, revealedIdCards);
       }
 
-      console.log(`[UseCaseFlipCard] Estado después de flipCard:`, newState);
+      //console.log(`[UseCaseFlipCard] Estado después de flipCard:`, newState);
       return {
         id: newState.id,
         name: newState.name,
@@ -26,6 +27,7 @@ export class UseCaseFlipCard {
       console.warn(
         `[UseCaseFlipCard] No se puede hacer clic en la carta ${cardId} para el jugador ${playerName}. Verifique las condiciones de turno y estado de la carta.`,
       );
+      throw new Error("Cannot flip card: Invalid conditions");
     }
 
     return gameState;
@@ -79,28 +81,25 @@ export class UseCaseFlipCard {
     return gameState;
   }
 
-  checkMatch(gameState: GameState): GameState {
+  checkMatch(gameState: GameState, revealedIdCards: string[]): GameState {
     let hasMatch = false;
     const flippedCards = gameState.cards.filter(
-      (c) => c.isRevealed && !c.isMatched,
+      (c) => c.id === revealedIdCards[0] || c.id === revealedIdCards[1],
     );
-    if (flippedCards.length === 2) {
-      const [card1, card2] = flippedCards;
-      if (card1.value === card2.value) {
-        hasMatch = true;
-        //card1.isMatched = true;
-        //card2.isMatched = true;
-      } else {
-        //card1.isRevealed = false;
-        //card2.isRevealed = false;
-      }
+
+    const [card1, card2] = flippedCards;
+    if (card1.value === card2.value) {
+      hasMatch = true;
+    }
+
+    const currentPlayer = gameState.players.find((p) => p.turn);
+    if (currentPlayer) {
+      currentPlayer.remainMoves = 2; // Reset moves on match
     }
 
     if (hasMatch) {
-      const currentPlayer = gameState.players.find((p) => p.turn);
       if (currentPlayer) {
         currentPlayer.points += 1;
-        currentPlayer.remainMoves = 2; // Reset moves on match
       }
     } else {
       // Si no hay match, pasamos el turno al siguiente jugador
@@ -111,5 +110,11 @@ export class UseCaseFlipCard {
     }
 
     return gameState;
+  }
+
+  getIdCardsRevealedAndNotMatched(gameState: GameState): string[] {
+    return gameState.cards
+      .filter((c) => c.isRevealed && !c.isMatched)
+      .map((c) => c.id);
   }
 }
