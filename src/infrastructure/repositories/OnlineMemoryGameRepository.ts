@@ -12,6 +12,7 @@ import { SignalRGameHub } from "../signalr/SignalRGameHub";
 export class OnlineMemoryGameRepository implements GameRepository {
   private listeners: Set<() => void> = new Set();
   private version: number = 0;
+  private connectionStatus: number = 0;
   private hub: SignalRGameHub;
 
   constructor(hubUrl: string) {
@@ -27,6 +28,13 @@ export class OnlineMemoryGameRepository implements GameRepository {
       const reconstructed = this.convertJsonGameToObject(GameJson);
 
       this.save(reconstructed);
+    });
+
+    this.hub.setConnectionStatus((status: number) => {
+      console.log("Connection status changed:", status);
+      this.connectionStatus = status;
+      // Notify subscribers so UI can react to connection status changes
+      this.listeners.forEach((l) => l());
     });
 
     // Iniciar la conexión
@@ -51,6 +59,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
   };
 
   getVersion = (): number => this.version;
+  getConnectionStatus = (): number => this.connectionStatus;
 
   save(state: Game): void {
     localStorage.setItem("memory-game-state", JSON.stringify(state));

@@ -5,6 +5,7 @@ import { useGame } from "../hooks/useGame";
 import { usePlayer } from "../hooks/usePlayer";
 import { MemoryCard } from "../components/card/MemoryCard";
 import { ScoreBoard } from "../components/scoreBoard/ScoreBoard";
+import { ConnectionStatus } from "../components/connection/ConnectionStatus";
 import { LinkShare } from "../components/linkShare/LinkShare";
 
 const BoardWrapper = styled.div`
@@ -58,7 +59,16 @@ export const GameBoard = () => {
 
   return (
     <BoardWrapper>
-      <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
+        <ConnectionStatus />
+      </div>
       {stateGame.players.length < 2 && (
         <>
           <Header>Esperando jugador...</Header>

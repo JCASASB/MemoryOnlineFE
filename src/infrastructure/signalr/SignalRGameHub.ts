@@ -11,6 +11,7 @@ export class SignalRGameHub implements GameHubPort {
   // Handlers para evitar el error de "método no encontrado"
   private onGameUpdatedCallback?: (gameJson: string) => void;
   private onCardFlippedCallback?: (cardId: string) => void;
+  private setConnectionStatusCallback?: (status: number) => void;
 
   constructor(hubUrl: string) {
     this.connection = new signalR.HubConnectionBuilder()
@@ -69,21 +70,25 @@ export class SignalRGameHub implements GameHubPort {
   }
 
   private setupLoggers() {
-    this.connection.onreconnecting((err) =>
-      console.warn("[SignalR] Reconectando...", err),
-    );
-    this.connection.onreconnected((id) =>
-      console.log("[SignalR] Reconectado:", id),
-    );
-    this.connection.onclose((err) =>
-      console.log("[SignalR] Conexión cerrada", err),
-    );
+    this.connection.onreconnecting((err) => {
+      this.setConnectionStatusCallback?.(1);
+      console.warn("[SignalR] Reconectando...", err);
+    });
+    this.connection.onreconnected((id) => {
+      this.setConnectionStatusCallback?.(2);
+      console.log("[SignalR] Reconectado:", id);
+    });
+    this.connection.onclose((err) => {
+      this.setConnectionStatusCallback?.(0);
+      console.log("[SignalR] Conexión cerrada", err);
+    });
   }
 
   async connect(): Promise<void> {
     if (this.connection.state === signalR.HubConnectionState.Disconnected) {
       try {
         await this.connection.start();
+        this.setConnectionStatusCallback?.(2);
         console.log(
           "[SignalR] Conectado con ID:",
           this.connection.connectionId,
@@ -102,6 +107,10 @@ export class SignalRGameHub implements GameHubPort {
 
   onRemoteGameUpdated(callback: (gameJson: string) => void): void {
     this.onGameUpdatedCallback = callback;
+  }
+
+  setConnectionStatus(callback: (status: number) => void): void {
+    this.setConnectionStatusCallback = callback;
   }
 
   // ... (Resto de métodos sendCreateGame, sendJoinGame, disconnect se mantienen igual)

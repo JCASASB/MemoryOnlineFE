@@ -11,8 +11,7 @@ import { ApplicationJoinGame } from "../../core/application/ApplicationJoinGame"
 import { ApplicationCheckCards } from "../../core/application/ApplicationCheckCards";
 import { UseCaseCheckCards } from "../../core/domain/useCases/UseCaseCheckCards";
 
-const SIGNALR_HUB_URL =
-  import.meta.env.VITE_SIGNALR_HUB_URL || "http://localhost:5000/gamehub";
+const SIGNALR_HUB_URL = import.meta.env.VITE_SIGNALR_HUB_URL;
 
 interface Props {
   children: React.ReactNode;
@@ -23,7 +22,6 @@ export const DependencyProvider = ({ children }: Props) => {
   const dependencies = useMemo<MemoryContextType>(() => {
     const onlineRepo = new OnlineMemoryGameRepository(SIGNALR_HUB_URL);
     return {
-      repository: onlineRepo,
       applicationFlipCard: new ApplicationFlipCard(
         onlineRepo,
         new UseCaseFlipCard(),
