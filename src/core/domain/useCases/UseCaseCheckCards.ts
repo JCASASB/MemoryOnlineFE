@@ -21,7 +21,7 @@ export class UseCaseCheckCards {
     }
   }
 
-  checkMatch(cards: Card[], revealedIdCards: [string, string][]): Card[] {
+  checkMatch(cards: Card[], revealedIdCards: [string, number][]): Card[] {
     let newCards = [];
 
     const isMatch = revealedIdCards[0][1] === revealedIdCards[1][1];
@@ -41,7 +41,7 @@ export class UseCaseCheckCards {
     return newCards;
   }
 
-  getCardsRevealedAndNotMatched(game: Game): [string, string][] {
+  getCardsRevealedAndNotMatched(game: Game): [string, number][] {
     return game.cards
       .filter((c) => c.isRevealed && !c.isMatched)
       .map((c) => [c.id, c.value]);

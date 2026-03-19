@@ -5,10 +5,10 @@ import { useUCs } from "../../hooks/useUCs";
 
 interface MemoryCardProps {
   id: string;
-  value: string;
+  value: number;
   isRevealed: boolean;
   isMatched: boolean;
-  flip: (id: string) => void;
+  flip: (id: string) => Promise<void> | void;
 }
 
 const CardContainer = styled.div<{

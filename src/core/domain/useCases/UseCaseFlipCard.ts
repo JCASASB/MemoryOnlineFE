@@ -53,7 +53,7 @@ export class UseCaseFlipCard {
 
   checkMatchPlayers(
     players: Player[],
-    revealedIdCards: [string, string][],
+    revealedIdCards: [string, number][],
   ): Player[] {
     if (revealedIdCards.length === 2) {
       const isMatch = revealedIdCards[0][1] === revealedIdCards[1][1];
@@ -96,7 +96,7 @@ export class UseCaseFlipCard {
     }
   }
 
-  getCardsRevealedAndNotMatched(cards: Card[]): [string, string][] {
+  getCardsRevealedAndNotMatched(cards: Card[]): [string, number][] {
     return cards
       .filter((c) => c.isRevealed && !c.isMatched)
       .map((c) => [c.id, c.value]);

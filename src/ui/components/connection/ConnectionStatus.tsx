@@ -1,7 +1,5 @@
 import { useConnectionStatus } from "../../hooks/useConnectionStatus";
 
-type ConnState = "connected" | "connecting" | "disconnected";
-
 export const ConnectionStatus = () => {
   const { connectionStatus } = useConnectionStatus();
 
