@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useDependencies } from "../context/useDependencies";
 import { Game } from "../../core/domain/entities/Game";
 /**
@@ -7,26 +7,14 @@ import { Game } from "../../core/domain/entities/Game";
  * - Los use cases (FlipCard, StartGame) son siempre los mismos;
  *   la diferencia está en la implementación del repositorio inyectado.
  */
-export const useGame = () => {
+export const useGameState = () => {
   const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0));
 
-  const {
-    applicationFlipCard,
-    applicationCreateGame,
-    applicationJoinGame,
-    applicationCheckCards,
-    getUpdatedStateUseCase,
-    onlineRepository,
-  } = useDependencies();
+  const { getUpdatedStateUseCase, onlineRepository } = useDependencies();
 
   // useSyncExternalStore se suscribe a los cambios del repositorio
   const versionChange = useSyncExternalStore(onlineRepository.subscribe, () =>
     onlineRepository.getVersion(),
-  );
-
-  const thisconnectionStatus = useSyncExternalStore(
-    onlineRepository.subscribe,
-    () => onlineRepository.getConnectionStatus(),
   );
 
   // Cuando cambia la versión, llama a UseCaseUpdateStateFromServer
@@ -44,37 +32,9 @@ export const useGame = () => {
       }
     };
     updateState();
-  }, [versionChange, onlineRepository]);
+  }, [versionChange]);
 
   return {
-    connectionStatus: thisconnectionStatus,
     stateGame: stateGame,
-    flipCardUC: useCallback(
-      async (id: string, playerId: string) => {
-        const newState = await applicationFlipCard.execute(id, playerId);
-        setStateGame(newState);
-      },
-      [applicationFlipCard],
-    ),
-    createGameUC: useCallback(
-      async (level: number, gameName: string, playerName: string) => {
-        const newState = await applicationCreateGame.execute(
-          level,
-          gameName,
-          playerName,
-        );
-        setStateGame(newState);
-      },
-      [applicationCreateGame],
-    ),
-    joinGameUC: useCallback(
-      async (gameName: string, playerName: string) =>
-        await applicationJoinGame.execute(gameName, playerName),
-      [applicationJoinGame],
-    ),
-    checkCardsUC: useCallback(async () => {
-      const newState = await applicationCheckCards.execute();
-      setStateGame(newState);
-    }, [applicationCheckCards]),
   };
 };

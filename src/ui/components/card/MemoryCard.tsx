@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import whichTransitionEventF from "./extra";
-import { useGame } from "../../hooks/useGame";
+import { useUCs } from "../../hooks/useUCs";
 
 interface MemoryCardProps {
   id: string;
@@ -62,7 +62,7 @@ const CardContainer = styled.div<{
 export const MemoryCard = memo(
   ({ id, value, isRevealed, isMatched, flip }: MemoryCardProps) => {
     //console.log("Renderizando carta:", id, "Valor:", value, "Revelada:", isRevealed, "Emparejada:", isMatched);
-    const { checkCardsUC } = useGame();
+    const { checkCardsUC } = useUCs();
 
     const transitionEvent = whichTransitionEventF();
 

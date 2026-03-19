@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../hooks/usePlayer";
-import { useGame } from "../hooks/useGame";
+import { useUCs } from "../hooks/useUCs";
 
 const Wrapper = styled.div`
   display: flex;
@@ -77,7 +77,7 @@ export const CreateGame = () => {
   const [nivel, setNivel] = useState("3");
   const navigate = useNavigate();
   const startedRef = useRef(false);
-  const { createGameUC } = useGame();
+  const { createGameUC } = useUCs();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

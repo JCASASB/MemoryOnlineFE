@@ -1,9 +1,9 @@
-import { useGame } from "../../hooks/useGame";
+import { useConnectionStatus } from "../../hooks/useConnectionStatus";
 
 type ConnState = "connected" | "connecting" | "disconnected";
 
 export const ConnectionStatus = () => {
-  const { connectionStatus } = useGame();
+  const { connectionStatus } = useConnectionStatus();
 
   const color =
     connectionStatus === 2
@@ -17,7 +17,7 @@ export const ConnectionStatus = () => {
       <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
         <circle cx="6" cy="6" r="6" fill={color} />
       </svg>
-      <span style={{ fontSize: 12, color: "#333" }}>{status}</span>
+      <span style={{ fontSize: 12, color: "#333" }}>{connectionStatus}</span>
     </div>
   );
 };

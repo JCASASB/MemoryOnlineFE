@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useGame } from "../hooks/useGame";
 import { usePlayer } from "../hooks/usePlayer";
 import { MemoryCard } from "../components/card/MemoryCard";
 import { ScoreBoard } from "../components/scoreBoard/ScoreBoard";
 import { ConnectionStatus } from "../components/connection/ConnectionStatus";
 import { LinkShare } from "../components/linkShare/LinkShare";
+import { useGameState } from "../hooks/useGameState";
+import { useUCs } from "../hooks/useUCs";
 
 const BoardWrapper = styled.div`
   display: flex;
@@ -45,7 +46,8 @@ export const GameBoard = () => {
     }
   }, [playerName, navigate]);
 
-  const { stateGame, flipCardUC } = useGame();
+  const { flipCardUC } = useUCs();
+  const { stateGame } = useGameState();
 
   const stableFlip = useCallback(
     (id: string) => flipCardUC(id, playerName),
