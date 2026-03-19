@@ -1,10 +1,9 @@
 import { Game } from "../entities/Game";
-import type { GameState } from "../entities/GameState";
 import { Player } from "../entities/Player";
 import { v4 as uuidv4 } from "uuid";
 
 export class UseCaseCreateGame {
-  execute(level: number, gameName: string, playerName: string): GameState {
+  execute(level: number, gameName: string, playerName: string): Game {
     const player = new Player(uuidv4(), playerName, 2, 0, 0, false);
 
     const players: Player[] = [player];
@@ -18,6 +17,6 @@ export class UseCaseCreateGame {
       cards: game.cards,
       players: game.players,
       isProcessing: game.isProcessing,
-    } as GameState;
+    } as Game;
   }
 }

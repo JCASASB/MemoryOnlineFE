@@ -1,6 +1,5 @@
 import * as signalR from "@microsoft/signalr";
 import type { GameHubPort } from "../../core/domain/ports/GameHubPort";
-import type { GameState } from "../../core/domain/entities/GameState";
 import { Card } from "../../core/domain/entities/Card";
 import { Player } from "../../core/domain/entities/Player";
 import { Game } from "../../core/domain/entities/Game";
@@ -10,7 +9,7 @@ export class SignalRGameHub implements GameHubPort {
   // gameName is unused currently; keep if needed later
 
   // Handlers para evitar el error de "método no encontrado"
-  private onGameStateUpdatedCallback?: (gameStateJson: string) => void;
+  private onGameUpdatedCallback?: (gameJson: string) => void;
   private onCardFlippedCallback?: (cardId: string) => void;
 
   constructor(hubUrl: string) {
@@ -36,9 +35,9 @@ export class SignalRGameHub implements GameHubPort {
       console.error("[SignalR] Server Error:", message);
     });
 
-    this.connection.on("GameStateUpdated", (gameStateString: string) => {
-      if (this.onGameStateUpdatedCallback) {
-        this.onGameStateUpdatedCallback(gameStateString);
+    this.connection.on("GameStateUpdated", (gameString: string) => {
+      if (this.onGameUpdatedCallback) {
+        this.onGameUpdatedCallback(gameString);
       }
     });
 
@@ -52,15 +51,15 @@ export class SignalRGameHub implements GameHubPort {
     await this.connection.stop();
   }
 
-  async sendUpdateStateGame(gameState: GameState): Promise<void> {
-    const plainState = this.toPlainGameState(gameState);
+  async sendUpdateStateGame(game: Game): Promise<void> {
+    const plainState = this.toPlainGame(game);
 
-    // Asegúrate de que el nombre coincida con el método en C# (UpdateGameState)
+    // Asegúrate de que el nombre coincida con el método en C# (UpdateGame)
     await this.connection.invoke("UpdateGameState", plainState);
   }
 
-  async sendCreateGame(gameState: GameState): Promise<void> {
-    const plainState = this.toPlainGameState(gameState);
+  async sendCreateGame(game: Game): Promise<void> {
+    const plainState = this.toPlainGame(game);
 
     await this.connection.invoke("CreateGame", plainState);
   }
@@ -101,27 +100,27 @@ export class SignalRGameHub implements GameHubPort {
     this.onCardFlippedCallback = callback;
   }
 
-  onRemoteGameStateUpdated(callback: (gameStateJson: string) => void): void {
-    this.onGameStateUpdatedCallback = callback;
+  onRemoteGameUpdated(callback: (gameJson: string) => void): void {
+    this.onGameUpdatedCallback = callback;
   }
 
   // ... (Resto de métodos sendCreateGame, sendJoinGame, disconnect se mantienen igual)
 
-  private toPlainGameState(gameState: GameState): any {
+  private toPlainGame(game: Game): any {
     return {
-      Id: gameState.id,
-      Name: gameState.name,
-      IsProcessing: gameState.isProcessing,
-      Level: gameState.level,
+      Id: game.id,
+      Name: game.name,
+      IsProcessing: game.isProcessing,
+      Level: game.level,
       Cards:
-        gameState.cards?.map((c) => ({
+        game.cards?.map((c) => ({
           Id: c.id,
           Value: String(c.value),
           IsRevealed: c.isRevealed,
           IsMatched: c.isMatched,
         })) || [],
       Players:
-        gameState.players?.map((p) => ({
+        game.players?.map((p) => ({
           Id: p.id,
           Name: p.name,
           RemainMoves: p.remainMoves,
@@ -132,12 +131,12 @@ export class SignalRGameHub implements GameHubPort {
     };
   }
 
-  getNewObjectGameState(data: any): GameState {
+  getNewObjectGame(data: any): Game {
     // Si el servidor envía un string JSON, lo parseamos; si no, usamos el objeto directamente
-    const gameState = typeof data === "string" ? JSON.parse(data) : data;
+    const game = typeof data === "string" ? JSON.parse(data) : data;
 
-    const rawCards = gameState.cards || gameState.Cards || [];
-    const rawPlayers = gameState.players || gameState.Players || [];
+    const rawCards = game.cards || game.Cards || [];
+    const rawPlayers = game.players || game.Players || [];
 
     const cards = rawCards.map(
       (c: any) =>
@@ -161,25 +160,23 @@ export class SignalRGameHub implements GameHubPort {
         ),
     );
 
-    const id = gameState.id || gameState.Id || "";
-    const name = gameState.name || gameState.Name || "";
-    const level = gameState.level ?? gameState.Level ?? 0;
+    const id = game.id || game.Id || "";
+    const name = game.name || game.Name || "";
+    const level = game.level ?? game.Level ?? 0;
 
     const reconstructed = new Game(id, name, level);
     reconstructed.cards = cards;
     reconstructed.players = players;
-    reconstructed.isProcessing = !!(
-      gameState.isProcessing ?? gameState.IsProcessing
-    );
+    reconstructed.isProcessing = !!(game.isProcessing ?? game.IsProcessing);
 
     return reconstructed;
   }
 
   offAll(): void {
-    this.onGameStateUpdatedCallback = undefined;
+    this.onGameUpdatedCallback = undefined;
     this.onCardFlippedCallback = undefined;
     // Si quieres dejar de escuchar físicamente:
-    this.connection.off("GameStateUpdated");
+    this.connection.off("GameUpdated");
     this.connection.off("cardFlipped");
     this.connection.off("error");
     this.connection.off("Error");

@@ -1,4 +1,4 @@
-import type { GameState } from "../entities/GameState";
+import type { Game } from "../entities/Game";
 
 /**
  * Puerto para comunicación en tiempo real con el servidor de juego.
@@ -9,12 +9,12 @@ export interface GameHubPort {
   disconnect(): Promise<void>;
 
   // Enviar acciones al servidor
-  sendCreateGame(gameState: GameState): Promise<void>;
+  sendCreateGame(game: Game): Promise<void>;
   sendJoinGame(gameName: string, playerName: string): Promise<void>;
-  sendUpdateStateGame(gameState: GameState): Promise<void>;
+  sendUpdateStateGame(game: Game): Promise<void>;
 
   // Escuchar acciones remotas
-  onRemoteGameStateUpdated(callback: (gameStateJson: string) => void): void;
+  onRemoteGameUpdated(callback: (gameJson: string) => void): void;
 
   offAll(): void;
 }

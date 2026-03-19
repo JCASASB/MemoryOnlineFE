@@ -1,14 +1,13 @@
 import { Card } from "./Card";
-import type { GameState } from "./GameState";
 import { Player } from "./Player";
 
-export class Game implements GameState {
+export class Game {
   constructor(
-    public id: string,
-    public name: string,
-    public level: number,
-    public isProcessing: boolean = false,
-    public cards: Card[] = [],
-    public players: Player[] = [],
+    public readonly id: string,
+    public readonly name: string,
+    public readonly level: number,
+    public readonly isProcessing: boolean = false,
+    public readonly cards: Card[] = [],
+    public readonly players: Player[] = [],
   ) {}
 }

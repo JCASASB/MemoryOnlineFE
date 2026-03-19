@@ -2,9 +2,9 @@ export class Player {
   constructor(
     public readonly id: string,
     public readonly name: string,
-    public remainMoves: number,
-    public totalMoves: number,
-    public points: number,
-    public turn: boolean,
+    public readonly remainMoves: number,
+    public readonly totalMoves: number,
+    public readonly points: number,
+    public readonly turn: boolean,
   ) {}
 }

@@ -1,6 +1,6 @@
+import type { Game } from "../../core/domain/entities/Game";
 import type { GameRepository } from "../../core/domain/repositories/GameRepository";
 import { SignalRGameHub } from "../signalr/SignalRGameHub";
-import type { GameState } from "../../core/domain/entities/GameState";
 // Card type not required here; state stored as plain objects
 
 /**
@@ -23,8 +23,8 @@ export class OnlineMemoryGameRepository implements GameRepository {
   /** Conecta al hub y registra los listeners de eventos remotos */
   async connectHub(): Promise<void> {
     // Registrar callbacks antes de conectar para no perder mensajes inmediatos
-    this.hub.onRemoteGameStateUpdated((gameStateJson: string) => {
-      const reconstructed = this.convertJsonGameStateToObject(gameStateJson);
+    this.hub.onRemoteGameUpdated((GameJson: string) => {
+      const reconstructed = this.convertJsonGameToObject(GameJson);
 
       this.save(reconstructed);
     });
@@ -39,20 +39,20 @@ export class OnlineMemoryGameRepository implements GameRepository {
     await this.hub.disconnect();
   }
 
-  getState = (): GameState => {
+  getState = (): Game => {
     const stored = localStorage.getItem("memory-game-state");
     if (stored) {
       const state = JSON.parse(stored);
-      return state as GameState;
+      return state as Game;
       //  return this.normalizeState(state);
     } else {
-      return {} as GameState;
+      return {} as Game;
     }
   };
 
   getVersion = (): number => this.version;
 
-  save(state: GameState): void {
+  save(state: Game): void {
     localStorage.setItem("memory-game-state", JSON.stringify(state));
     this.version++;
     this.listeners.forEach((l) => l());
@@ -69,7 +69,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
   // ─── Acciones online (envío al hub) ────────────────────────
 
   /** Implementa CreateGame de GameRepository */
-  async createGameToServer(state: GameState): Promise<void> {
+  async createGameToServer(state: Game): Promise<void> {
     await this.hub.sendCreateGame(state);
   }
 
@@ -77,13 +77,13 @@ export class OnlineMemoryGameRepository implements GameRepository {
     await this.hub.sendJoinGame(gameName, playerName);
   }
 
-  async updateStateToServer(state: GameState): Promise<void> {
+  async updateStateToServer(state: Game): Promise<void> {
     await this.hub.sendUpdateStateGame(state);
   }
 
-  convertJsonGameStateToObject(jsonString: string): GameState {
+  convertJsonGameToObject(jsonString: string): Game {
     const parsed = JSON.parse(jsonString);
     // Aquí podrías agregar lógica adicional para convertir a clases específicas si es necesario
-    return parsed as GameState;
+    return parsed as Game;
   }
 }

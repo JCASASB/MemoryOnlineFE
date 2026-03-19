@@ -1,5 +1,5 @@
+import type { Game } from "../domain/entities/Game";
 import type { GameRepository } from "../domain/repositories/GameRepository";
-import type { GameState } from "../domain/entities/GameState";
 import { UseCaseCreateGame } from "../domain/useCases/UseCaseCreateGame";
 
 export class ApplicationCreateGame {
@@ -12,15 +12,15 @@ export class ApplicationCreateGame {
     level: number,
     gameName: string,
     playerName: string,
-  ): Promise<GameState> {
+  ): Promise<Game> {
     await this.repository.connectHub();
 
-    const gameState = this.useCase.execute(level, gameName, playerName);
+    const game = this.useCase.execute(level, gameName, playerName);
 
-    this.repository.save(gameState);
+    this.repository.save(game);
 
-    await this.repository.createGameToServer(gameState);
+    await this.repository.createGameToServer(game);
 
-    return gameState;
+    return game;
   }
 }

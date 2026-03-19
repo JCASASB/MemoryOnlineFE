@@ -1,45 +1,49 @@
-import type { GameState } from "../entities/GameState";
+import { Card } from "../entities/Card";
+import { Game } from "../entities/Game";
 
 export class UseCaseCheckCards {
-  execute(gameState: GameState): GameState {
-    const idCardsRevealedAndNotMatched =
-      this.getIdCardsRevealedAndNotMatched(gameState);
-    if (idCardsRevealedAndNotMatched.length === 2) {
-      gameState = this.checkMatch(gameState, idCardsRevealedAndNotMatched);
+  execute(game: Game): Game {
+    const cardsRevealedAndNotMatched = this.getCardsRevealedAndNotMatched(game);
+
+    if (cardsRevealedAndNotMatched.length === 2) {
+      const cards = this.checkMatch(game.cards, cardsRevealedAndNotMatched);
 
       return {
-        id: gameState.id,
-        name: gameState.name,
-        level: gameState.level,
-        cards: gameState.cards,
-        players: gameState.players,
-        isProcessing: gameState.isProcessing,
-      } as GameState;
+        id: game.id,
+        name: game.name,
+        level: game.level,
+        cards: cards,
+        players: game.players,
+        isProcessing: game.isProcessing,
+      } as Game;
     } else {
-      return gameState;
+      return game;
     }
   }
 
-  checkMatch(gameState: GameState, revealedIdCards: string[]): GameState {
-    const flippedCards = gameState.cards.filter(
-      (c) => c.id === revealedIdCards[0] || c.id === revealedIdCards[1],
-    );
+  checkMatch(cards: Card[], revealedIdCards: [string, string][]): Card[] {
+    let newCards = [];
 
-    const [card1, card2] = flippedCards;
-    if (card1.value === card2.value) {
-      card1.isMatched = true;
-      card2.isMatched = true;
-    } else {
-      card1.isRevealed = false;
-      card2.isRevealed = false;
-    }
+    const isMatch = revealedIdCards[0][1] === revealedIdCards[1][1];
 
-    return gameState;
+    newCards = cards.map((c) => {
+      if (c.id === revealedIdCards[0][0] || c.id === revealedIdCards[1][0]) {
+        if (isMatch) {
+          return new Card(c.id, c.value, c.imageUrl, true, true);
+        } else {
+          return new Card(c.id, c.value, c.imageUrl, false, false);
+        }
+      } else {
+        return c;
+      }
+    });
+
+    return newCards;
   }
 
-  getIdCardsRevealedAndNotMatched(gameState: GameState): string[] {
-    return gameState.cards
+  getCardsRevealedAndNotMatched(game: Game): [string, string][] {
+    return game.cards
       .filter((c) => c.isRevealed && !c.isMatched)
-      .map((c) => c.id);
+      .map((c) => [c.id, c.value]);
   }
 }

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useDependencies } from "../context/useDependencies";
 import { Game } from "../../core/domain/entities/Game";
-import type { GameState } from "../../core/domain/entities/GameState";
 /**
  * Hook unificado para el juego (offline y online).
  * - Si existe onlineRepository y se pasa gameName, conecta/desconecta al hub.
@@ -9,7 +8,7 @@ import type { GameState } from "../../core/domain/entities/GameState";
  *   la diferencia está en la implementación del repositorio inyectado.
  */
 export const useGame = () => {
-  const [stateGame, setStateGame] = useState<GameState>(new Game("", "", 0));
+  const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0));
 
   const {
     repository,
