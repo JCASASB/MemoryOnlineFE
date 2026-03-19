@@ -1,7 +1,5 @@
 import * as signalR from "@microsoft/signalr";
 import type { GameHubPort } from "../../core/domain/ports/GameHubPort";
-import { Card } from "../../core/domain/entities/Card";
-import { Player } from "../../core/domain/entities/Player";
 import { Game } from "../../core/domain/entities/Game";
 
 export class SignalRGameHub implements GameHubPort {
@@ -53,16 +51,13 @@ export class SignalRGameHub implements GameHubPort {
   }
 
   async sendUpdateStateGame(game: Game): Promise<void> {
-    const plainState = this.toPlainGame(game);
-
     // Asegúrate de que el nombre coincida con el método en C# (UpdateGame)
-    await this.connection.invoke("UpdateGameState", plainState);
+    console.log(`[SignalR] >>> Enviando UpdateGameState: `, game);
+    await this.connection.invoke("UpdateGameState", game);
   }
 
   async sendCreateGame(game: Game): Promise<void> {
-    const plainState = this.toPlainGame(game);
-
-    await this.connection.invoke("CreateGame", plainState);
+    await this.connection.invoke("CreateGame", game);
   }
 
   async sendJoinGame(gameName: string, playerName: string): Promise<void> {
@@ -113,81 +108,17 @@ export class SignalRGameHub implements GameHubPort {
     this.setConnectionStatusCallback = callback;
   }
 
-  // ... (Resto de métodos sendCreateGame, sendJoinGame, disconnect se mantienen igual)
-
-  private toPlainGame(game: Game): any {
-    return {
-      Id: game.id,
-      Name: game.name,
-      IsProcessing: game.isProcessing,
-      Level: game.level,
-      Cards:
-        game.cards?.map((c) => ({
-          Id: c.id,
-          Value: String(c.value),
-          IsRevealed: c.isRevealed,
-          IsMatched: c.isMatched,
-        })) || [],
-      Players:
-        game.players?.map((p) => ({
-          Id: p.id,
-          Name: p.name,
-          RemainMoves: p.remainMoves,
-          TotalMoves: p.totalMoves,
-          Points: p.points,
-          Turn: p.turn,
-        })) || [],
-    };
-  }
-
-  getNewObjectGame(data: any): Game {
-    // Si el servidor envía un string JSON, lo parseamos; si no, usamos el objeto directamente
-    const game = typeof data === "string" ? JSON.parse(data) : data;
-
-    const rawCards = game.cards || game.Cards || [];
-    const rawPlayers = game.players || game.Players || [];
-
-    const cards = rawCards.map(
-      (c: any) =>
-        new Card(
-          c.id || c.Id,
-          c.value || c.Value,
-          c.isMatched ?? c.IsMatched,
-          c.isRevealed ?? c.IsRevealed,
-        ),
-    );
-
-    const players = rawPlayers.map(
-      (p: any) =>
-        new Player(
-          p.id || p.Id,
-          p.name || p.Name,
-          p.remainMoves ?? p.RemainMoves,
-          p.totalMoves ?? p.TotalMoves,
-          p.points ?? p.Points,
-          p.turn ?? p.Turn,
-        ),
-    );
-
-    const id = game.id || game.Id || "";
-    const name = game.name || game.Name || "";
-    const level = game.level ?? game.Level ?? 0;
-
-    const reconstructed = new Game(id, name, level);
-    reconstructed.cards = cards;
-    reconstructed.players = players;
-    reconstructed.isProcessing = !!(game.isProcessing ?? game.IsProcessing);
-
-    return reconstructed;
-  }
-
   offAll(): void {
     this.onGameUpdatedCallback = undefined;
     this.onCardFlippedCallback = undefined;
     // Si quieres dejar de escuchar físicamente:
-    this.connection.off("GameUpdated");
+    this.connection.off("GameStateUpdated");
     this.connection.off("cardFlipped");
+    this.connection.off("LogFromServer");
     this.connection.off("error");
     this.connection.off("Error");
+    this.connection.off("reconnecting");
+    this.connection.off("reconnected");
+    this.connection.off("close");
   }
 }

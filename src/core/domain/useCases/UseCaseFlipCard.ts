@@ -44,7 +44,7 @@ export class UseCaseFlipCard {
 
     const newCards = cards.map((c) =>
       c.id === cardId
-        ? new Card(c.id, c.value, c.imageUrl, c.isMatched, true)
+        ? new Card(c.id, c.value, c.imgUrl, c.isMatched, true)
         : c,
     );
 

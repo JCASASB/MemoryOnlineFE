@@ -29,9 +29,9 @@ export class UseCaseCheckCards {
     newCards = cards.map((c) => {
       if (c.id === revealedIdCards[0][0] || c.id === revealedIdCards[1][0]) {
         if (isMatch) {
-          return new Card(c.id, c.value, c.imageUrl, true, true);
+          return new Card(c.id, c.value, c.imgUrl, true, true);
         } else {
-          return new Card(c.id, c.value, c.imageUrl, false, false);
+          return new Card(c.id, c.value, c.imgUrl, false, false);
         }
       } else {
         return c;
