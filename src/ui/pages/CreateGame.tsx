@@ -85,9 +85,11 @@ export const CreateGame = () => {
 
     savePlayerName(trimmedUsuario);
     const sala = trimmedUsuario;
-    createGameUC(Number(nivel), sala, trimmedUsuario);
 
-    navigate(`/online?level=${nivel}&gameName=${encodeURIComponent(sala)}`);
+    createGameUC(Number(nivel), sala, trimmedUsuario).then(() => {
+      // Navegar a la sala de juego después de crearla
+      navigate(`/online?level=${nivel}&gameName=${encodeURIComponent(sala)}`);
+    });
   };
 
   return (
