@@ -72,28 +72,22 @@ const Button = styled.button`
 
 export const CreateGame = () => {
   const { playerName, savePlayerName } = usePlayer();
-  const [sala, setSala] = useState("");
   const [usuario, setUsuario] = useState(playerName);
   const [nivel, setNivel] = useState("3");
   const navigate = useNavigate();
-  const startedRef = useRef(false);
   const { createGameUC } = useUCs();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedSala = sala.trim();
+
     const trimmedUsuario = usuario.trim();
-    if (!trimmedSala || !trimmedUsuario) return;
+    if (!trimmedUsuario) return;
+
     savePlayerName(trimmedUsuario);
+    const sala = trimmedUsuario;
+    createGameUC(Number(nivel), sala, trimmedUsuario);
 
-    if (!startedRef.current) {
-      createGameUC(Number(nivel), trimmedSala, trimmedUsuario);
-      startedRef.current = true;
-    }
-
-    navigate(
-      `/online?level=${nivel}&gameName=${encodeURIComponent(trimmedSala)}`,
-    );
+    navigate(`/online?level=${nivel}&gameName=${encodeURIComponent(sala)}`);
   };
 
   return (
@@ -109,16 +103,6 @@ export const CreateGame = () => {
             onChange={(e) => setUsuario(e.target.value)}
             maxLength={20}
             autoFocus
-          />
-        </Label>
-        <Label>
-          Nombre de sala
-          <Input
-            type="text"
-            placeholder="Ej: sala-1"
-            value={sala}
-            onChange={(e) => setSala(e.target.value)}
-            maxLength={40}
           />
         </Label>
         <Label>

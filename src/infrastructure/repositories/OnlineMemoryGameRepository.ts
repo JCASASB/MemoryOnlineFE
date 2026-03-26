@@ -1,7 +1,6 @@
 import type { Game } from "../../core/domain/entities/Game";
 import type { GameRepository } from "../../core/domain/repositories/GameRepository";
 import { SignalRGameHub } from "../signalr/SignalRGameHub";
-// Card type not required here; state stored as plain objects
 
 /**
  * Repositorio online que implementa GameRepository.
@@ -72,12 +71,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
     return () => this.listeners.delete(listener);
   };
 
-  // Permite a useGame leer la versión para forzar actualización si es necesario
-  // (ya definido arriba)
-
   // ─── Acciones online (envío al hub) ────────────────────────
-
-  /** Implementa CreateGame de GameRepository */
   async createGameToServer(state: Game): Promise<void> {
     await this.hub.sendCreateGame(state);
   }
@@ -92,7 +86,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
 
   convertJsonGameToObject(jsonString: string): Game {
     const parsed = JSON.parse(jsonString);
-    // Aquí podrías agregar lógica adicional para convertir a clases específicas si es necesario
+
     return parsed as Game;
   }
 }
