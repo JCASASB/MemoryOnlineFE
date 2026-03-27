@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync-s3": "aws s3 sync dist/ s3://$S3_BUCKET --delete --cache-control \"public, max-age=31536000, immutable\" --exclude \"index.html\" && aws s3 cp dist/index.html s3://$S3_BUCKET/index.html --cache-control \"no-cache, no-store, max-age=0, must-revalidate\"",
+    "deploy": "npm run build && npm run sync-s3"
   },
   "dependencies": {
     "@microsoft/signalr": "^10.0.0",

@@ -41,10 +41,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 5. Sincroniza la carpeta generada con el bucket de S3
-      - name: Deploy to S3
+      # 5a. Sincroniza assets estáticos con cache largo (inmutable por hash)
+      - name: Deploy assets to S3 (long cache)
         env:
           BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: |
           BUCKET=$(echo "$BUCKET" | tr -d '[:space:]')
-          aws s3 sync ./dist "s3://${BUCKET}/memory" --delete
+          aws s3 sync ./dist "s3://${BUCKET}/memory" --delete \
+            --exclude "index.html" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      # 5b. Sube index.html sin cache para que CloudFront siempre sirva la versión más reciente
+      - name: Deploy index.html to S3 (no-cache)
+        env:
+          BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        run: |
+          BUCKET=$(echo "$BUCKET" | tr -d '[:space:]')
+          aws s3 cp ./dist/index.html "s3://${BUCKET}/memory/index.html" \
+            --cache-control "no-cache, no-store, max-age=0, must-revalidate"
