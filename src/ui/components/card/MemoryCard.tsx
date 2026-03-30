@@ -30,7 +30,9 @@ const CardContainer = styled.div<{
     transition: transform 0.6s;
     transform-style: preserve-3d;
     transform: ${({ $state }) =>
-      $state === StateCard.FaceUp ? "rotateY(180deg)" : "none"};
+      $state === StateCard.FaceUp || $state === StateCard.Matched
+        ? "rotateY(180deg)"
+        : "none"};
   }
 
   .card-front,

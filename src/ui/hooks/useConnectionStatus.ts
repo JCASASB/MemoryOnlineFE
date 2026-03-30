@@ -4,9 +4,11 @@ import { useDependencies } from "../context/useDependencies";
 export const useConnectionStatus = () => {
   const { onlineRepository } = useDependencies();
 
+  const getTheConnectionStatus = () => onlineRepository.getConnectionStatus();
+
   const thisconnectionStatus = useSyncExternalStore(
-    onlineRepository.subscribe,
-    () => onlineRepository.getConnectionStatus(),
+    onlineRepository.subscribeToStatus,
+    getTheConnectionStatus,
   );
 
   return {

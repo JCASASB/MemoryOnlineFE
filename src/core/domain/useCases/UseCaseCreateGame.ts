@@ -14,6 +14,7 @@ export class UseCaseCreateGame {
       id: game.id,
       name: game.name,
       level: game.level,
+      version: game.version + 1,
       cards: game.cards,
       players: game.players,
       isProcessing: game.isProcessing,

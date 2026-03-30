@@ -16,6 +16,7 @@ export class UseCaseFlipCard {
         id: game.id,
         name: game.name,
         level: game.level,
+        version: game.version + 1,
         cards: cards,
         players: players,
         isProcessing: game.isProcessing,

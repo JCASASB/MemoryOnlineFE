@@ -2,9 +2,12 @@ import type { Game } from "../entities/Game";
 
 export interface GameRepository {
   save(state: Game): void;
-  getState(): Game;
+  getLastState(): Game;
+  goToVersionState(stateVersion: number): Game;
   getVersion(): number;
-  subscribe(listener: () => void): () => void;
+  subscribeToVersion(callback: () => void): () => void;
+  getConnectionStatus(): number;
+  subscribeToStatus(callback: () => void): () => void;
   connectHub(): void;
   updateStateToServer(state: Game): Promise<void>;
   joinGameToServer(gameName: string, playerName: string): Promise<void>;

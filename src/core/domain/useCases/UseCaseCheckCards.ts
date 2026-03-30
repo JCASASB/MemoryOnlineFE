@@ -13,6 +13,7 @@ export class UseCaseCheckCards {
         id: game.id,
         name: game.name,
         level: game.level,
+        version: game.version + 1,
         cards: cards,
         players: game.players,
         isProcessing: game.isProcessing,

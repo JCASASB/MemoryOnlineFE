@@ -9,7 +9,7 @@ export class ApplicationFlipCard {
   ) {}
 
   async execute(cardId: string, playerName: string): Promise<Game> {
-    const state = this.repository.getState();
+    const state = this.repository.getLastState();
 
     const playerId = state.players.find((p) => p.name === playerName)?.id;
 

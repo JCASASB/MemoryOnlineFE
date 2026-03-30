@@ -8,13 +8,14 @@ import { Game } from "../../core/domain/entities/Game";
  *   la diferencia está en la implementación del repositorio inyectado.
  */
 export const useGameState = () => {
-  const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0));
+  const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0, 0));
 
   const { getUpdatedStateUseCase, onlineRepository } = useDependencies();
 
   // useSyncExternalStore se suscribe a los cambios del repositorio
-  const versionChange = useSyncExternalStore(onlineRepository.subscribe, () =>
-    onlineRepository.getVersion(),
+  const versionChange = useSyncExternalStore(
+    onlineRepository.subscribeToVersion,
+    () => onlineRepository.getVersion(),
   );
 
   // Cuando cambia la versión, llama a UseCaseUpdateStateFromServer

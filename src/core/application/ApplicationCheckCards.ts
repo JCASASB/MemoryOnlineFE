@@ -9,7 +9,7 @@ export class ApplicationCheckCards {
   ) {}
 
   async execute(): Promise<Game> {
-    const state = this.repository.getState();
+    const state = this.repository.getLastState();
 
     const game = this.useCase.execute(state);
 

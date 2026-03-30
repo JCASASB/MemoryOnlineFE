@@ -12,7 +12,9 @@ import { SignalRGameHub } from "../signalr/SignalRGameHub";
  * con otros jugadores en tiempo real.
  */
 export class OnlineMemoryGameRepository implements GameRepository {
-  private listeners: Set<() => void> = new Set();
+  private listenerStatus: () => void = () => {};
+  private listenerVersion: () => void = () => {};
+
   private version: number = 0;
   private connectionStatus: number = 0;
   private hub: SignalRGameHub;
@@ -36,7 +38,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
       console.log("Connection status changed:", status);
       this.connectionStatus = status;
       // Notify subscribers so UI can react to connection status changes
-      this.listeners.forEach((l) => l());
+      this.listenerStatus();
     });
 
     // Iniciar la conexión
@@ -49,8 +51,8 @@ export class OnlineMemoryGameRepository implements GameRepository {
     await this.hub.disconnect();
   }
 
-  getState = (): Game => {
-    const stored = localStorage.getItem("memory-game-state");
+  getLastState = (): Game => {
+    const stored = localStorage.getItem(this.version.toString());
     if (stored) {
       return this.normalizeGame(JSON.parse(stored));
     } else {
@@ -58,18 +60,41 @@ export class OnlineMemoryGameRepository implements GameRepository {
     }
   };
 
+  goToVersionState(stateVersion: number): Game {
+    const stored = localStorage.getItem(stateVersion.toString());
+    if (stored) {
+      const versionGame = this.normalizeGame(JSON.parse(stored));
+      this.version = versionGame.version;
+      this.listenerVersion();
+      return versionGame;
+    } else {
+      return {} as Game;
+    }
+  }
+
   getVersion = (): number => this.version;
+
   getConnectionStatus = (): number => this.connectionStatus;
 
   save(state: Game): void {
-    localStorage.setItem("memory-game-state", JSON.stringify(state));
-    this.version++;
-    this.listeners.forEach((l) => l());
+    console.log("Saving state to localStorage with version:", state.version);
+    localStorage.setItem(state.version.toString(), JSON.stringify(state));
+    this.version = state.version;
+    this.listenerVersion();
   }
 
-  subscribe = (listener: () => void): (() => void) => {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+  subscribeToVersion = (callback: () => void): (() => void) => {
+    this.listenerVersion = callback;
+    return () => {
+      this.listenerVersion = () => {};
+    };
+  };
+
+  subscribeToStatus = (callback: () => void): (() => void) => {
+    this.listenerStatus = callback;
+    return () => {
+      this.listenerStatus = () => {};
+    };
   };
 
   // ─── Acciones online (envío al hub) ────────────────────────
