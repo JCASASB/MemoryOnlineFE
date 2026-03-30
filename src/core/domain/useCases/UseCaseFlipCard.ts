@@ -1,6 +1,7 @@
 import { Card } from "../entities/Card";
 import { Game } from "../entities/Game";
 import { Player } from "../entities/Player";
+import { StateCard } from "../entities/StateCard";
 
 export class UseCaseFlipCard {
   execute(game: Game, cardId: string, playerId: string): Game {
@@ -33,19 +34,17 @@ export class UseCaseFlipCard {
     return (
       game.players.some(
         (p) => p.id === playerId && p.turn === true && p.remainMoves > 0,
-      ) && game.cards.find((c) => c.id === cardId)?.isRevealed === false
+      ) && game.cards.find((c) => c.id === cardId)?.state === StateCard.FaceDown
     );
   }
 
   flipCard(cards: Card[], cardId: string): Card[] {
     const card = cards.find((c) => c.id === cardId);
-    if (!card || card.isRevealed || card.isMatched)
+    if (!card || card.state !== StateCard.FaceDown)
       throw new Error("Invalid card flip");
 
     const newCards = cards.map((c) =>
-      c.id === cardId
-        ? new Card(c.id, c.value, c.imgUrl, c.isMatched, true)
-        : c,
+      c.id === cardId ? new Card(c.id, c.value, c.imgUrl, StateCard.FaceUp) : c,
     );
 
     return newCards;
@@ -98,7 +97,7 @@ export class UseCaseFlipCard {
 
   getCardsRevealedAndNotMatched(cards: Card[]): [string, number][] {
     return cards
-      .filter((c) => c.isRevealed && !c.isMatched)
+      .filter((c) => c.state === StateCard.FaceUp)
       .map((c) => [c.id, c.value]);
   }
 }

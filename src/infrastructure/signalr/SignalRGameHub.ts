@@ -37,8 +37,15 @@ export class SignalRGameHub implements GameHubPort {
   }
 
   async sendUpdateStateGame(game: Game): Promise<void> {
-    console.log(`[SignalR] >>> Enviando UpdateGameState: `, game);
-    await this.connection.invoke("UpdateGameState", game);
+    console.log(`[SignalR] >>> Enviando UpdateGameState (objeto):`, game);
+    console.log(`[SignalR] >>> Payload JSON:`, JSON.stringify(game));
+    try {
+      await this.connection.invoke("UpdateGameState", game);
+      console.log(`[SignalR] >>> UpdateGameState OK`);
+    } catch (err) {
+      console.error(`[SignalR] >>> Error en UpdateGameState:`, err);
+      throw err;
+    }
   }
 
   async sendCreateGame(game: Game): Promise<void> {

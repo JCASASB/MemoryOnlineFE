@@ -1,4 +1,7 @@
+import { Card } from "../../core/domain/entities/Card";
 import type { Game } from "../../core/domain/entities/Game";
+import { Player } from "../../core/domain/entities/Player";
+import { StateCard } from "../../core/domain/entities/StateCard";
 import type { GameRepository } from "../../core/domain/repositories/GameRepository";
 import { SignalRGameHub } from "../signalr/SignalRGameHub";
 
@@ -49,9 +52,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
   getState = (): Game => {
     const stored = localStorage.getItem("memory-game-state");
     if (stored) {
-      const state = JSON.parse(stored);
-      return state as Game;
-      //  return this.normalizeState(state);
+      return this.normalizeGame(JSON.parse(stored));
     } else {
       return {} as Game;
     }
@@ -86,7 +87,33 @@ export class OnlineMemoryGameRepository implements GameRepository {
 
   convertJsonGameToObject(jsonString: string): Game {
     const parsed = JSON.parse(jsonString);
+    return this.normalizeGame(parsed);
+  }
 
-    return parsed as Game;
+  private normalizeGame(parsed: any): Game {
+    const cards: Card[] = (parsed.cards ?? []).map(
+      (c: any) =>
+        new Card(c.id, Number(c.value), c.imgUrl, c.state as StateCard),
+    );
+    const players: Player[] = (parsed.players ?? []).map(
+      (p: any) =>
+        new Player(
+          p.id,
+          p.name,
+          Number(p.remainMoves),
+          Number(p.totalMoves),
+          Number(p.points),
+          Boolean(p.turn),
+        ),
+    );
+    return {
+      id: parsed.id,
+      name: parsed.name,
+      level: Number(parsed.level),
+      version: Number(parsed.version ?? 0),
+      isProcessing: Boolean(parsed.isProcessing),
+      cards,
+      players,
+    } as Game;
   }
 }

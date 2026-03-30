@@ -2,27 +2,26 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import whichTransitionEventF from "./extra";
 import { useUCs } from "../../hooks/useUCs";
+import { StateCard } from "../../../core/domain/entities/StateCard";
 
 interface MemoryCardProps {
   id: string;
   value: number;
-  isRevealed: boolean;
-  isMatched: boolean;
+  state: StateCard;
   flip: (id: string) => Promise<void> | void;
 }
 
 const CardContainer = styled.div<{
-  $isRevealed: boolean;
-  $isMatched: boolean;
+  $state: StateCard;
   $isAnimating: boolean;
 }>`
   width: 100%;
   max-width: 160px;
   aspect-ratio: 5 / 7;
   perspective: 1000px;
-  cursor: ${({ $isRevealed, $isMatched, $isAnimating }) =>
-    $isRevealed || $isMatched || $isAnimating ? "default" : "pointer"};
-  opacity: ${({ $isMatched }) => ($isMatched ? 0.5 : 1)};
+  cursor: ${({ $state, $isAnimating }) =>
+    $state === StateCard.FaceDown && !$isAnimating ? "pointer" : "default"};
+  opacity: ${({ $state }) => ($state === StateCard.Matched ? 0.5 : 1)};
 
   .card-inner {
     position: relative;
@@ -30,8 +29,8 @@ const CardContainer = styled.div<{
     height: 100%;
     transition: transform 0.6s;
     transform-style: preserve-3d;
-    transform: ${({ $isRevealed }) =>
-      $isRevealed ? "rotateY(180deg)" : "none"};
+    transform: ${({ $state }) =>
+      $state === StateCard.FaceUp ? "rotateY(180deg)" : "none"};
   }
 
   .card-front,
@@ -60,7 +59,7 @@ const CardContainer = styled.div<{
 `;
 
 export const MemoryCard = memo(
-  ({ id, value, isRevealed, isMatched, flip }: MemoryCardProps) => {
+  ({ id, value, state, flip }: MemoryCardProps) => {
     //console.log("Renderizando carta:", id, "Valor:", value, "Revelada:", isRevealed, "Emparejada:", isMatched);
     const { checkCardsUC } = useUCs();
 
@@ -80,6 +79,13 @@ export const MemoryCard = memo(
       checkCardsUC();
     }, [checkCardsUC]);
 
+    const handleClick = () => {
+      console.log("Carta clickeada:", id, "Estado actual:", state);
+      if (state === StateCard.FaceDown && !isAnimating) {
+        flip(id);
+      }
+    };
+
     useEffect(() => {
       const node = containerRef.current;
       if (transitionEvent && node) {
@@ -98,10 +104,9 @@ export const MemoryCard = memo(
     return (
       <CardContainer
         ref={containerRef}
-        $isRevealed={isRevealed}
-        $isMatched={isMatched}
+        $state={state}
         $isAnimating={isAnimating}
-        onClick={() => (isRevealed || isAnimating ? "" : flip(id))}
+        onClick={handleClick}
       >
         <div className="card-inner">
           <div className="card-front">?</div>

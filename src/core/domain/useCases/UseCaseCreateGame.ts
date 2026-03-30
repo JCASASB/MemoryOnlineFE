@@ -8,7 +8,7 @@ export class UseCaseCreateGame {
 
     const players: Player[] = [player];
 
-    const game = new Game(uuidv4(), gameName, level, false, [], players);
+    const game = new Game(uuidv4(), gameName, level, 0, false, [], players);
 
     return {
       id: game.id,

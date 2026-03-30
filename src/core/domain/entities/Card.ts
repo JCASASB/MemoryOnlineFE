@@ -1,9 +1,10 @@
+import { StateCard } from "./StateCard";
+
 export class Card {
   constructor(
     public readonly id: string,
     public readonly value: number,
     public readonly imgUrl: string,
-    public readonly isMatched: boolean = false,
-    public readonly isRevealed: boolean = false,
+    public readonly state: StateCard = StateCard.FaceDown,
   ) {}
 }

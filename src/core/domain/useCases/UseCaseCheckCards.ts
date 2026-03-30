@@ -1,5 +1,6 @@
 import { Card } from "../entities/Card";
 import { Game } from "../entities/Game";
+import { StateCard } from "../entities/StateCard";
 
 export class UseCaseCheckCards {
   execute(game: Game): Game {
@@ -29,9 +30,9 @@ export class UseCaseCheckCards {
     newCards = cards.map((c) => {
       if (c.id === revealedIdCards[0][0] || c.id === revealedIdCards[1][0]) {
         if (isMatch) {
-          return new Card(c.id, c.value, c.imgUrl, true, true);
+          return new Card(c.id, c.value, c.imgUrl, StateCard.Matched);
         } else {
-          return new Card(c.id, c.value, c.imgUrl, false, false);
+          return new Card(c.id, c.value, c.imgUrl, StateCard.FaceDown);
         }
       } else {
         return c;
@@ -43,7 +44,7 @@ export class UseCaseCheckCards {
 
   getCardsRevealedAndNotMatched(game: Game): [string, number][] {
     return game.cards
-      .filter((c) => c.isRevealed && !c.isMatched)
+      .filter((c) => c.state === StateCard.FaceUp)
       .map((c) => [c.id, c.value]);
   }
 }
