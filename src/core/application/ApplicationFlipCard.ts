@@ -11,7 +11,11 @@ export class ApplicationFlipCard {
   async execute(cardId: string, playerName: string): Promise<Game> {
     const state = this.repository.getLastState();
 
+    console.log("this is the playerName, cardId:", playerName, cardId);
+
     const playerId = state.players.find((p) => p.name === playerName)?.id;
+
+    console.log("this is the playerId, cardId:", playerId, cardId);
 
     if (!playerId) {
       throw new Error(`Player with name ${playerName} not found in game state`);
