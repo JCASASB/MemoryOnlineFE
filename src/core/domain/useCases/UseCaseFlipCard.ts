@@ -25,13 +25,46 @@ export class UseCaseFlipCard {
       console.warn(
         `[UseCaseFlipCard] No se puede hacer clic en la carta ${cardId} para el jugador ${playerId}. Verifique las condiciones de turno y estado de la carta.`,
       );
-      throw new Error("Cannot flip card: Invalid conditions");
+      //throw new Error("Cannot flip card: Invalid conditions");
     }
 
     return game;
   }
 
+  private logCanClickVariables(
+    game: Game,
+    cardId: string,
+    playerId: string,
+  ): void {
+    const existsPlayerId = game.players.some((p) => p.id === playerId);
+
+    const playerHasTurn = game.players.some(
+      (p) => p.id === playerId && p.turn === true,
+    );
+
+    const isCurrentPlayerWithMoves = game.players.some(
+      (p) => p.id === playerId && p.turn === true && p.remainMoves > 0,
+    );
+
+    const targetCard = game.cards.find((c) => c.id === cardId);
+    const isTargetCardFaceDown = targetCard?.state === StateCard.FaceDown;
+
+    console.log(`[UseCaseFlipCard][canClick] existsPlayerId:`, existsPlayerId);
+    console.log(`[UseCaseFlipCard][canClick] playerHasTurn:`, playerHasTurn);
+    console.log(
+      `[UseCaseFlipCard][canClick] isCurrentPlayerWithMoves:`,
+      isCurrentPlayerWithMoves,
+    );
+    console.log(`[UseCaseFlipCard][canClick] targetCard:`, targetCard);
+    console.log(
+      `[UseCaseFlipCard][canClick] isTargetCardFaceDown:`,
+      isTargetCardFaceDown,
+    );
+  }
+
   canClick(game: Game, cardId: string, playerId: string): boolean {
+    this.logCanClickVariables(game, cardId, playerId);
+
     return (
       game.players.some(
         (p) => p.id === playerId && p.turn === true && p.remainMoves > 0,
