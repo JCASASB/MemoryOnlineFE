@@ -67,8 +67,6 @@ export const GameBoard = () => {
     [stateGame.cards.length],
   );
 
-  const currentPlayer = stateGame.players.find((p) => p.name === playerName);
-
   return (
     <BoardWrapper>
       <div
