@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import whichTransitionEventF from "./extra";
 import { StateCard } from "../../../core/domain/entities/StateCard";
@@ -8,7 +8,6 @@ interface MemoryCardProps {
   id: string;
   value: number;
   state: StateCard;
-  isTurn: boolean;
   flip: (id: string) => void;
 }
 
@@ -61,13 +60,7 @@ const CardContainer = styled.div<{
   }
 `;
 
-export const MemoryCard = ({
-  id,
-  value,
-  state,
-  isTurn,
-  flip,
-}: MemoryCardProps) => {
+export const MemoryCard = ({ id, value, state, flip }: MemoryCardProps) => {
   //console.log("Renderizando carta:", id, "Valor:", value, "Revelada:", isRevealed, "Emparejada:", isMatched);
   const { addAnimationInProgress, removeAnimationInProgress } = useAnimations();
 

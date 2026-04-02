@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../hooks/usePlayer";
@@ -89,12 +89,7 @@ export const GameBoard = () => {
       )}
       <Grid $columns={columns}>
         {stateGame.cards.map((card) => (
-          <MemoryCard
-            key={card.id}
-            {...card}
-            isTurn={currentPlayer?.turn ?? false}
-            flip={stableFlip}
-          />
+          <MemoryCard key={card.id} {...card} flip={stableFlip} />
         ))}
       </Grid>
     </BoardWrapper>

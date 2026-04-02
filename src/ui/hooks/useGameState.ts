@@ -1,31 +1,18 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { useDependencies } from "../context/useDependencies";
 import { Game } from "../../core/domain/entities/Game";
 
 /**
  * Hook unificado para el juego (offline y online).
- * - Si existe onlineRepository y se pasa gameName, conecta/desconecta al hub.
- * - Los use cases (FlipCard, StartGame) son siempre los mismos;
- *   la diferencia está en la implementación del repositorio inyectado.
  */
 export const useGameState = () => {
   const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0, 0));
 
-  const { getUpdatedStateUseCase, onlineRepository, getNextStateUseCase } =
-    useDependencies();
-
-  const [contador, setContador] = useState(0);
-
-  // useSyncExternalStore se suscribe a los cambios del repositorio
-  const versionChange = useSyncExternalStore(
-    onlineRepository.subscribeToVersion,
-    () => onlineRepository.getVersion(),
-  );
+  const { getNextStateUseCase } = useDependencies();
 
   useEffect(() => {
     // 1. Definir el intervalo
     const intervalId = setInterval(async () => {
-      setContador((c) => c + 1); // Ejemplo de actualización
       const state = await getNextStateUseCase.execute();
       if (state) {
         // console.log(`Estado actualizado desde el contador:  `, state);

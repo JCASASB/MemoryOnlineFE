@@ -1,4 +1,3 @@
-import type { Game } from "../domain/entities/Game";
 import type { GameRepository } from "../domain/repositories/GameRepository";
 import type { UseCaseFlipCard } from "../domain/useCases/UseCaseFlipCard";
 
