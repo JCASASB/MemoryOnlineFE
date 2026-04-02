@@ -7,7 +7,6 @@ export class Game {
     public readonly name: string,
     public readonly level: number,
     public readonly version: number,
-    public readonly isProcessing: boolean = false,
     public readonly cards: Card[] = [],
     public readonly players: Player[] = [],
   ) {}

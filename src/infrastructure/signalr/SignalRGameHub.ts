@@ -7,6 +7,7 @@ export class SignalRGameHub implements GameHubPort {
 
   // Handlers para evitar el error de "método no encontrado"
   private onGameUpdatedCallback?: (gameJson: string) => void;
+  private onSetInitialStateCallback?: (gameJson: string) => void;
   private setConnectionStatusCallback?: (status: number) => void;
 
   constructor(hubUrl: string) {
@@ -23,6 +24,12 @@ export class SignalRGameHub implements GameHubPort {
     this.connection.on("GameStateUpdated", (gameString: string) => {
       if (this.onGameUpdatedCallback) {
         this.onGameUpdatedCallback(gameString);
+      }
+    });
+
+    this.connection.on("SetInitialState", (gameString: string) => {
+      if (this.onSetInitialStateCallback) {
+        this.onSetInitialStateCallback(gameString);
       }
     });
 
@@ -91,6 +98,9 @@ export class SignalRGameHub implements GameHubPort {
     this.onGameUpdatedCallback = callback;
   }
 
+  onSetInitialState(callback: (gameJson: string) => void): void {
+    this.onSetInitialStateCallback = callback;
+  }
   setConnectionStatus(callback: (status: number) => void): void {
     this.setConnectionStatusCallback = callback;
   }

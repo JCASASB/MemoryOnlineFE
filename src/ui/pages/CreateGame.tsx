@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../hooks/usePlayer";
@@ -75,7 +75,16 @@ export const CreateGame = () => {
   const [usuario, setUsuario] = useState(playerName);
   const [nivel, setNivel] = useState("3");
   const navigate = useNavigate();
-  const { createGameUC } = useUCs();
+  const { createGameUC, joinGameUC } = useUCs();
+
+  useEffect(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      // no-op
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,9 +95,11 @@ export const CreateGame = () => {
     savePlayerName(trimmedUsuario);
     const sala = trimmedUsuario;
 
-    createGameUC(Number(nivel), sala, trimmedUsuario).then(() => {
-      // Navegar a la sala de juego después de crearla
-      navigate(`/online?level=${nivel}&gameName=${encodeURIComponent(sala)}`);
+    createGameUC(Number(nivel), sala).then(() => {
+      joinGameUC(sala, trimmedUsuario).then(() => {
+        // Navegar a la sala de juego después de unirse
+        navigate(`/online?level=${nivel}&gameName=${encodeURIComponent(sala)}`);
+      });
     });
   };
 

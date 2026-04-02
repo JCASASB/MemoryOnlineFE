@@ -16,6 +16,7 @@ export class OnlineMemoryGameRepository implements GameRepository {
   private listenerVersion: () => void = () => {};
 
   private version: number = 0;
+  private animationsInProgress: string[] = [];
   private connectionStatus: number = 0;
   private hub: SignalRGameHub;
 
@@ -30,7 +31,12 @@ export class OnlineMemoryGameRepository implements GameRepository {
     // Registrar callbacks antes de conectar para no perder mensajes inmediatos
     this.hub.onRemoteGameUpdated((GameJson: string) => {
       const reconstructed = this.convertJsonGameToObject(GameJson);
+      this.save(reconstructed);
+    });
 
+    this.hub.onSetInitialState((GameJson: string) => {
+      const reconstructed = this.convertJsonGameToObject(GameJson);
+      this.version = reconstructed.version - 1; // Asegurar que la versión local se sincronice con el estado inicial
       this.save(reconstructed);
     });
 
@@ -51,25 +57,44 @@ export class OnlineMemoryGameRepository implements GameRepository {
     await this.hub.disconnect();
   }
 
-  getLastState = (): Game => {
+  getState = (): Game => {
     const stored = localStorage.getItem(this.version.toString());
     if (stored) {
       return this.normalizeGame(JSON.parse(stored));
     } else {
-      return {} as Game;
+      throw new Error(`No state found for version ${this.version}`);
     }
   };
 
-  goToVersionState(stateVersion: number): Game {
+  goToVersionState(stateVersion: number): Game | undefined {
     const stored = localStorage.getItem(stateVersion.toString());
+    console.log("try Going to next version state:", stateVersion);
     if (stored) {
       const versionGame = this.normalizeGame(JSON.parse(stored));
       this.version = versionGame.version;
       this.listenerVersion();
       return versionGame;
     } else {
-      return {} as Game;
+      return undefined;
     }
+  }
+
+  justGetVersionState(stateVersion: number): Game | undefined {
+    const stored = localStorage.getItem(stateVersion.toString());
+    console.log("try Going to next version state:", stateVersion);
+    if (stored) {
+      const versionGame = this.normalizeGame(JSON.parse(stored));
+      return versionGame;
+    } else {
+      return undefined;
+    }
+  }
+
+  goToNextVersionState(): Game | undefined {
+    if (!this.areAnimationsInProgress()) {
+      return this.goToVersionState(this.version + 1);
+    }
+    return undefined;
   }
 
   getVersion = (): number => this.version;
@@ -79,8 +104,14 @@ export class OnlineMemoryGameRepository implements GameRepository {
   save(state: Game): void {
     console.log("Saving state to localStorage with version:", state.version);
     localStorage.setItem(state.version.toString(), JSON.stringify(state));
-    this.version = state.version;
-    this.listenerVersion();
+    if (!this.areAnimationsInProgress()) {
+      //this.goToNextVersionState();
+    } else {
+      console.log(
+        "State saved but animations are in progress. Version update deferred.",
+        this.animationsInProgress,
+      );
+    }
   }
 
   subscribeToVersion = (callback: () => void): (() => void) => {
@@ -115,6 +146,26 @@ export class OnlineMemoryGameRepository implements GameRepository {
     return this.normalizeGame(parsed);
   }
 
+  async addAnimationInProgress(animationId: string): Promise<void> {
+    this.animationsInProgress.push(animationId);
+  }
+
+  async removeAnimationInProgress(animationIds: string[]): Promise<void> {
+    this.animationsInProgress = this.animationsInProgress.filter(
+      (id) => !animationIds.includes(id),
+    );
+    console.log(
+      "Removed animations:",
+      animationIds,
+      "Remaining animations:",
+      this.animationsInProgress,
+    );
+  }
+
+  areAnimationsInProgress(): boolean {
+    return this.animationsInProgress.length > 0;
+  }
+
   private normalizeGame(parsed: any): Game {
     const cards: Card[] = (parsed.cards ?? []).map(
       (c: any) =>
@@ -136,7 +187,6 @@ export class OnlineMemoryGameRepository implements GameRepository {
       name: parsed.name,
       level: Number(parsed.level),
       version: Number(parsed.version ?? 0),
-      isProcessing: Boolean(parsed.isProcessing),
       cards,
       players,
     } as Game;
