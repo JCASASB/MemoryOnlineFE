@@ -12,23 +12,27 @@ export const useUCs = () => {
   return {
     flipCardUC: useCallback(
       async (id: string, playerId: string) => {
-        await applicationFlipCard.execute(id, playerId);
+        return await applicationFlipCard.execute(id, playerId);
       },
       [applicationFlipCard],
     ),
     createGameUC: useCallback(
-      async (level: number, gameName: string, playerName: string) => {
-        await applicationCreateGame.execute(level, gameName, playerName);
+      async (level: number, gameName: string) => {
+        return await applicationCreateGame.execute(level, gameName);
       },
       [applicationCreateGame],
     ),
     joinGameUC: useCallback(
-      async (gameName: string, playerName: string) =>
-        await applicationJoinGame.execute(gameName, playerName),
+      async (gameName: string, playerName: string) => {
+        return await applicationJoinGame.execute(gameName, playerName);
+      },
       [applicationJoinGame],
     ),
-    checkCardsUC: useCallback(async () => {
-      await applicationCheckCards.execute();
-    }, [applicationCheckCards]),
+    checkCardsUC: useCallback(
+      async (versionNumber: number) => {
+        return await applicationCheckCards.execute(versionNumber);
+      },
+      [applicationCheckCards],
+    ),
   };
 };

@@ -10,6 +10,9 @@ import { UseCaseFlipCard } from "../../core/domain/useCases/UseCaseFlipCard";
 import { ApplicationJoinGame } from "../../core/application/ApplicationJoinGame";
 import { ApplicationCheckCards } from "../../core/application/ApplicationCheckCards";
 import { UseCaseCheckCards } from "../../core/domain/useCases/UseCaseCheckCards";
+import { ApplicationAnimationInProgressAdd } from "../../core/application/ApplicationAnimationInProgresAdd";
+import { ApplicationAnimationInProgressRemove } from "../../core/application/ApplicationAnimationInProgresRemove";
+import { ApplicationGetNextState } from "../../core/application/ApplicationGetNextState";
 
 const SIGNALR_HUB_URL = import.meta.env.VITE_SIGNALR_HUB_URL;
 
@@ -37,6 +40,12 @@ export const DependencyProvider = ({ children }: Props) => {
 
       applicationJoinGame: new ApplicationJoinGame(onlineRepo),
       getUpdatedStateUseCase: new UseCaseGetUpdatedState(onlineRepo),
+      getNextStateUseCase: new ApplicationGetNextState(onlineRepo),
+      applicationAnimationInProgressAdd: new ApplicationAnimationInProgressAdd(
+        onlineRepo,
+      ),
+      applicationAnimationInProgressRemove:
+        new ApplicationAnimationInProgressRemove(onlineRepo),
       onlineRepository: onlineRepo,
     };
   }, []);

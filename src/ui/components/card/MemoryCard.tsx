@@ -1,14 +1,15 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import whichTransitionEventF from "./extra";
-import { useUCs } from "../../hooks/useUCs";
 import { StateCard } from "../../../core/domain/entities/StateCard";
+import { useAnimations } from "../../hooks/useAnimations";
 
 interface MemoryCardProps {
   id: string;
   value: number;
   state: StateCard;
-  flip: (id: string) => Promise<void> | void;
+  isTurn: boolean;
+  flip: (id: string) => void;
 }
 
 const CardContainer = styled.div<{
@@ -60,61 +61,78 @@ const CardContainer = styled.div<{
   }
 `;
 
-export const MemoryCard = memo(
-  ({ id, value, state, flip }: MemoryCardProps) => {
-    //console.log("Renderizando carta:", id, "Valor:", value, "Revelada:", isRevealed, "Emparejada:", isMatched);
-    const { checkCardsUC } = useUCs();
+export const MemoryCard = ({
+  id,
+  value,
+  state,
+  isTurn,
+  flip,
+}: MemoryCardProps) => {
+  //console.log("Renderizando carta:", id, "Valor:", value, "Revelada:", isRevealed, "Emparejada:", isMatched);
+  const { addAnimationInProgress, removeAnimationInProgress } = useAnimations();
 
-    const transitionEvent = whichTransitionEventF();
+  const transitionEvent = whichTransitionEventF();
 
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [isAnimating, setIsAnimating] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-    const startAnimation = useCallback(() => {
-      setIsAnimating(true);
+  const startAnimation = useCallback(() => {
+    setIsAnimating(true);
+    if (state === StateCard.FaceUp) {
+      addAnimationInProgress(id);
       console.log("Animación de volteo iniciada para la carta:", id);
-    }, [id]);
+    }
+  }, [addAnimationInProgress, state, id]);
 
-    const finishAnimation = useCallback(() => {
-      setIsAnimating(false);
-      console.log("Animación de volteo finalizada para la carta:");
-      checkCardsUC();
-    }, [checkCardsUC]);
+  const finishAnimation = useCallback(() => {
+    setIsAnimating(false);
 
-    const handleClick = () => {
-      console.log("Carta clickeada:", id, "Estado actual:", state);
-      if (state === StateCard.FaceDown && !isAnimating) {
-        flip(id);
+    if (state === StateCard.FaceUp) {
+      removeAnimationInProgress(id);
+      console.log("Animación de volteo finalizada para la carta:", id);
+    }
+  }, [removeAnimationInProgress, state, id]);
+
+  const handleClick = () => {
+    console.log("Carta clickeada:", id, "Estado actual:", state);
+    if (state === StateCard.FaceDown && !isAnimating) {
+      flip(id);
+    }
+  };
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (transitionEvent && node) {
+      node.addEventListener("transitionstart", startAnimation as EventListener);
+      node.addEventListener(transitionEvent, finishAnimation as EventListener);
+    }
+
+    return () => {
+      if (transitionEvent && node) {
+        node.removeEventListener(
+          "transitionstart",
+          startAnimation as EventListener,
+        );
+        node.removeEventListener(
+          transitionEvent,
+          finishAnimation as EventListener,
+        );
       }
     };
+  }, [transitionEvent, startAnimation, finishAnimation]);
 
-    useEffect(() => {
-      const node = containerRef.current;
-      if (transitionEvent && node) {
-        node.addEventListener("transitionstart", startAnimation);
-        node.addEventListener(transitionEvent, finishAnimation);
-      }
-
-      return () => {
-        if (transitionEvent && node) {
-          node.removeEventListener("transitionstart", startAnimation);
-          node.removeEventListener(transitionEvent, finishAnimation);
-        }
-      };
-    }, [transitionEvent, startAnimation, finishAnimation]);
-
-    return (
-      <CardContainer
-        ref={containerRef}
-        $state={state}
-        $isAnimating={isAnimating}
-        onClick={handleClick}
-      >
-        <div className="card-inner">
-          <div className="card-front">?</div>
-          <div className="card-back">{value}</div>
-        </div>
-      </CardContainer>
-    );
-  },
-);
+  return (
+    <CardContainer
+      ref={containerRef}
+      $state={state}
+      $isAnimating={isAnimating}
+      data-state={StateCard[state]}
+      onClick={handleClick}
+    >
+      <div className="card-inner">
+        <div className="card-front">?</div>
+        <div className="card-back">{value}</div>
+      </div>
+    </CardContainer>
+  );
+};

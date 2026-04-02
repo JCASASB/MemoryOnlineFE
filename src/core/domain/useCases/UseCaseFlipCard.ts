@@ -4,7 +4,7 @@ import { Player } from "../entities/Player";
 import { StateCard } from "../entities/StateCard";
 
 export class UseCaseFlipCard {
-  execute(game: Game, cardId: string, playerId: string): Game {
+  execute(game: Game, cardId: string, playerId: string): Game | undefined {
     //  console.log(`[UseCaseFlipCard] Estado actual d:`, game);
     if (this.canClick(game, cardId, playerId)) {
       const cards = this.flipCard(game.cards, cardId);
@@ -19,16 +19,10 @@ export class UseCaseFlipCard {
         version: game.version + 1,
         cards: cards,
         players: players,
-        isProcessing: game.isProcessing,
       } as Game;
     } else {
-      console.warn(
-        `[UseCaseFlipCard] No se puede hacer clic en la carta ${cardId} para el jugador ${playerId}. Verifique las condiciones de turno y estado de la carta.`,
-      );
-      //throw new Error("Cannot flip card: Invalid conditions");
+      return undefined;
     }
-
-    return game;
   }
 
   private logCanClickVariables(

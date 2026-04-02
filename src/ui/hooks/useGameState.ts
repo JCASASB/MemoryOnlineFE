@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useDependencies } from "../context/useDependencies";
 import { Game } from "../../core/domain/entities/Game";
+
 /**
  * Hook unificado para el juego (offline y online).
  * - Si existe onlineRepository y se pasa gameName, conecta/desconecta al hub.
@@ -10,7 +11,10 @@ import { Game } from "../../core/domain/entities/Game";
 export const useGameState = () => {
   const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0, 0));
 
-  const { getUpdatedStateUseCase, onlineRepository } = useDependencies();
+  const { getUpdatedStateUseCase, onlineRepository, getNextStateUseCase } =
+    useDependencies();
+
+  const [contador, setContador] = useState(0);
 
   // useSyncExternalStore se suscribe a los cambios del repositorio
   const versionChange = useSyncExternalStore(
@@ -18,6 +22,23 @@ export const useGameState = () => {
     () => onlineRepository.getVersion(),
   );
 
+  useEffect(() => {
+    // 1. Definir el intervalo
+    const intervalId = setInterval(async () => {
+      setContador((c) => c + 1); // Ejemplo de actualización
+      const state = await getNextStateUseCase.execute();
+      if (state) {
+        // console.log(`Estado actualizado desde el contador:  `, state);
+        setStateGame(state);
+      } else {
+        // console.warn("No se pudo obtener el estado actualizado del contador.");
+      }
+    }, 100); // 5000 milisegundos
+
+    // 2. Limpiar el intervalo al desmontar el componente
+    return () => clearInterval(intervalId);
+  }, []); // El array vacío [] asegura que solo se ejecute al montar
+  /*
   // Cuando cambia la versión, llama a UseCaseUpdateStateFromServer
   useEffect(() => {
     const updateState = async () => {
@@ -34,7 +55,7 @@ export const useGameState = () => {
     };
     updateState();
   }, [versionChange]);
-
+ */
   return {
     stateGame: stateGame,
   };

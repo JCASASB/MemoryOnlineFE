@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../hooks/usePlayer";
@@ -74,6 +74,15 @@ export const JoinGame = () => {
   const [usuario, setUsuario] = useState(playerName);
   const navigate = useNavigate();
   const { joinGameUC } = useUCs();
+
+  useEffect(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      // no-op
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

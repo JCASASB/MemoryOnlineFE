@@ -8,14 +8,14 @@ export class ApplicationFlipCard {
     private readonly useCase: UseCaseFlipCard,
   ) {}
 
-  async execute(cardId: string, playerName: string): Promise<Game> {
-    const state = this.repository.getLastState();
+  async execute(cardId: string, playerName: string): Promise<number> {
+    const state = await this.repository.getState();
 
     console.log("this is the playerName, cardId:", playerName, cardId);
 
     const playerId = state.players.find((p) => p.name === playerName)?.id;
 
-    console.log("this is the playerId, cardId:", playerId, cardId);
+    //   console.log("this is the playerId, cardId:", playerId, cardId);
 
     if (!playerId) {
       throw new Error(`Player with name ${playerName} not found in game state`);
@@ -24,12 +24,11 @@ export class ApplicationFlipCard {
     const game = this.useCase.execute(state, cardId, playerId);
 
     if (game) {
-      this.repository.save(game);
-
+      await this.repository.save(game);
       await this.repository.updateStateToServer(game);
-      return game;
+      return game.version;
     } else {
-      return state;
+      return state.version;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../hooks/usePlayer";
@@ -46,18 +46,28 @@ export const GameBoard = () => {
     }
   }, [playerName, navigate]);
 
-  const { flipCardUC } = useUCs();
+  const { flipCardUC, checkCardsUC } = useUCs();
   const { stateGame } = useGameState();
 
-  const stableFlip = useCallback(
-    (id: string) => flipCardUC(id, playerName),
-    [flipCardUC, playerName],
-  );
+  const stableFlip = (id: string) => {
+    flipCardUC(id, playerName)
+      .then((versionNumber: number) => {
+        console.log(
+          `Flip successful for card ${id} - new version: ${versionNumber}`,
+        );
+        checkCardsUC(versionNumber);
+      })
+      .catch((error) => {
+        console.error(`Error flipping card ${id}:`, error);
+      });
+  };
 
   const columns = useMemo(
     () => Math.ceil(Math.sqrt(stateGame.cards.length)),
     [stateGame.cards.length],
   );
+
+  const currentPlayer = stateGame.players.find((p) => p.name === playerName);
 
   return (
     <BoardWrapper>
@@ -79,7 +89,12 @@ export const GameBoard = () => {
       )}
       <Grid $columns={columns}>
         {stateGame.cards.map((card) => (
-          <MemoryCard key={card.id} {...card} flip={stableFlip} />
+          <MemoryCard
+            key={card.id}
+            {...card}
+            isTurn={currentPlayer?.turn ?? false}
+            flip={stableFlip}
+          />
         ))}
       </Grid>
     </BoardWrapper>

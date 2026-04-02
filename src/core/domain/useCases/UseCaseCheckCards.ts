@@ -3,8 +3,13 @@ import { Game } from "../entities/Game";
 import { StateCard } from "../entities/StateCard";
 
 export class UseCaseCheckCards {
-  execute(game: Game): Game {
-    const cardsRevealedAndNotMatched = this.getCardsRevealedAndNotMatched(game);
+  execute(game: Game): Game | undefined {
+    const cardsRevealedAndNotMatched = this.getCardsWithStateFaceUp(game);
+
+    console.log(
+      "Cartas reveladas y no emparejadas:",
+      cardsRevealedAndNotMatched,
+    );
 
     if (cardsRevealedAndNotMatched.length === 2) {
       const cards = this.checkMatch(game.cards, cardsRevealedAndNotMatched);
@@ -16,20 +21,21 @@ export class UseCaseCheckCards {
         version: game.version + 1,
         cards: cards,
         players: game.players,
-        isProcessing: game.isProcessing,
       } as Game;
     } else {
-      return game;
+      return undefined;
     }
   }
 
-  checkMatch(cards: Card[], revealedIdCards: [string, number][]): Card[] {
+  checkMatch(cards: Card[], revealedIdCards: string[]): Card[] {
     let newCards = [];
 
-    const isMatch = revealedIdCards[0][1] === revealedIdCards[1][1];
+    const isMatch =
+      cards.find((c) => c.id === revealedIdCards[0])?.value ===
+      cards.find((c) => c.id === revealedIdCards[1])?.value;
 
     newCards = cards.map((c) => {
-      if (c.id === revealedIdCards[0][0] || c.id === revealedIdCards[1][0]) {
+      if (c.id === revealedIdCards[0] || c.id === revealedIdCards[1]) {
         if (isMatch) {
           return new Card(c.id, c.value, c.imgUrl, StateCard.Matched);
         } else {
@@ -43,9 +49,9 @@ export class UseCaseCheckCards {
     return newCards;
   }
 
-  getCardsRevealedAndNotMatched(game: Game): [string, number][] {
+  getCardsWithStateFaceUp(game: Game): string[] {
     return game.cards
       .filter((c) => c.state === StateCard.FaceUp)
-      .map((c) => [c.id, c.value]);
+      .map((c) => c.id);
   }
 }
