@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { usePlayer } from "../hooks/usePlayer";
 import { MemoryCard } from "../components/card/MemoryCard";
 import { ScoreBoard } from "../components/scoreBoard/ScoreBoard";
-import { ConnectionStatus } from "../components/connection/ConnectionStatus";
 import { LinkShare } from "../components/linkShare/LinkShare";
 import { useGameState } from "../hooks/useGameState";
 import { useUCs } from "../hooks/useUCs";
