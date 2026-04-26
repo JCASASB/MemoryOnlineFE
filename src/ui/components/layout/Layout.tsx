@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useDependencies } from "../../context/useDependencies";
+import { ConnectionStatus } from "../connection/ConnectionStatus";
 
 const navItems = [
   {
@@ -180,6 +181,19 @@ export const Layout = () => {
                 >
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
+              )}
+
+              {/* Badge de status connection */}
+              {item.path === "/login" && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -2,
+                    marginLeft: "60px",
+                  }}
+                >
+                  <ConnectionStatus />
+                </div>
               )}
             </button>
           );

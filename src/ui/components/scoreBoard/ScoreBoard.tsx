@@ -20,6 +20,11 @@ const Bar = styled.div`
   background: #000;
   border: 1px solid #222;
   box-sizing: border-box;
+
+  /* --- Efecto Blur --- */
+  background: rgba(0, 0, 0, 0.8); /* Negro con 60% de opacidad */
+  backdrop-filter: blur(12px); /* El desenfoque */
+  -webkit-backdrop-filter: blur(12px); /* Soporte para Safari */
 `;
 
 const Title = styled.span`

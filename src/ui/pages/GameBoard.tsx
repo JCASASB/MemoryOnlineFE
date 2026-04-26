@@ -13,15 +13,26 @@ const BoardWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
-  min-height: calc(100vh - 60px);
+  /* Eliminamos el min-height fijo para que fluya con el scroll del Layout */
   padding: 12px;
   box-sizing: border-box;
 `;
 
+// Contenedor para fijar el ScoreBoard
+const StickyHeader = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-bottom: 8px;
+  margin: -12px -12px 0 -12px; /* Compensa el padding del BoardWrapper */
+  padding: 12px 12px 8px 12px;
+`;
+
 const Header = styled.h1`
-  margin: 0 0 16px;
+  margin: 16px 0;
   flex-shrink: 0;
+  color: #fff;
+  font-size: 1.5rem;
 `;
 
 const Grid = styled.div<{ $columns: number }>`
@@ -31,6 +42,7 @@ const Grid = styled.div<{ $columns: number }>`
   gap: 12px;
   align-content: center;
   justify-items: center;
+  margin-top: 16px;
 `;
 
 export const GameBoard = () => {
@@ -39,7 +51,6 @@ export const GameBoard = () => {
   const { flipCardUC, checkCardsUC } = useUCs();
   const { stateGame } = useGameState();
 
-  // Si no hay nombre, redirigir al login con la URL actual como "next"
   useEffect(() => {
     if (!playerName) {
       const next = encodeURIComponent(
@@ -52,9 +63,6 @@ export const GameBoard = () => {
   const stableFlip = (id: string) => {
     flipCardUC(id, playerName)
       .then((versionNumber: number) => {
-        console.log(
-          `Flip successful for card ${id} - new version: ${versionNumber}`,
-        );
         checkCardsUC(versionNumber);
       })
       .catch((error) => {
@@ -69,22 +77,19 @@ export const GameBoard = () => {
 
   return (
     <BoardWrapper>
-      <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
-      <div
-        style={{
-          margin: "8px 0 0",
-          display: "flex",
-          justifyContent: "flex-end",
-        }}
-      >
-        <ConnectionStatus />
-      </div>
+      {/* Sección Fija Superior */}
+      <StickyHeader>
+        <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
+      </StickyHeader>
+
+      {/* Sección con Scroll */}
       {stateGame.players.length < 2 && (
-        <>
+        <div style={{ textAlign: "center" }}>
           <Header>Esperando jugador...</Header>
           <LinkShare />
-        </>
+        </div>
       )}
+
       <Grid $columns={columns}>
         {stateGame.cards.map((card) => (
           <MemoryCard
