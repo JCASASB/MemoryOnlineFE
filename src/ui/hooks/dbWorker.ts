@@ -1,41 +1,27 @@
-import { useEffect, useRef, useState } from "react";
-import { useDependencies } from "../context/useDependencies";
-import { Game } from "../../core/game/domain/entities/Game";
+import { GameDatabase } from "../../infrastructure/repositories/GameDatabase";
 
-export const useGameState = () => {
-  const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0, 0));
-  const { getNextStateUseCase } = useDependencies();
+const db = new GameDatabase();
 
-  // 1. Tipamos el useRef correctamente para que acepte Worker o null
-  const workerRef = useRef<Worker | null>(null);
+self.onmessage = (e) => {
+  if (e.data === "start") {
+    // Usamos un intervalo, pero Dexie es asíncrono (promesas)
+    setInterval(async () => {
+      try {
+        // 1. Obtenemos la última versión guardada (ejemplo: la más alta)
+        const lastGame = await db.games.orderBy("version").last();
+        const versionApplied = await db.getAppliedVersion();
 
-  useEffect(() => {
-    // 2. Usamos el objeto de configuración { type: "module" }
-    workerRef.current = new Worker(new URL("./dbWorker.ts", import.meta.url), {
-      type: "module",
-    });
-
-    const worker = workerRef.current; // Referencia local para evitar problemas de nulidad
-
-    // 3. Tipamos el evento como MessageEvent
-    worker.onmessage = async (event: MessageEvent) => {
-      if (event.data.type === "UPDATE_READY") {
-        const state = await getNextStateUseCase.execute();
-        if (state) {
-          setStateGame(state);
+        // Si la versión aplicada es menor que la última versión en DB, notificamos
+        if (lastGame && versionApplied < lastGame.version) {
+          // 2. Si existe un juego, notificamos al hilo principal
+          self.postMessage({
+            type: "UPDATE_READY",
+            payload: `Versión ${lastGame.version} encontrada en DB`,
+          });
         }
+      } catch (error) {
+        console.error("Error leyendo IndexedDB desde el worker:", error);
       }
-    };
-
-    worker.postMessage("start");
-
-    return () => {
-      // 4. Usamos la referencia local para terminar el worker
-      worker.terminate();
-    };
-  }, [getNextStateUseCase]);
-
-  return {
-    stateGame: stateGame,
-  };
+    }, 300);
+  }
 };
