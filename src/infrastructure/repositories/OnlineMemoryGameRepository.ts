@@ -4,7 +4,7 @@ import { Player } from "../../core/game/domain/entities/Player";
 import { StateCard } from "../../core/game/domain/entities/StateCard";
 import type { GameRepositoryType } from "../../core/game/repository/GameRepositoryType";
 import { SignalRGameHub } from "../signalr/SignalRGameHub";
-
+import { db } from "./GameDatabase";
 /**
  * Repositorio online que implementa GameRepository.
  * Extiende la funcionalidad de InMemoryGameRepository integrando
@@ -17,7 +17,6 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
 
   private hubUrl: string;
   private authToken: string = "";
-  private version: number = 0;
   private matchId: string = "";
   private animationsInProgress: string[] = [];
   private connectionStatus: number = 0;
@@ -63,74 +62,46 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     await this.hub.disconnect();
   }
 
-  clearAll(): void {
+  async clearAll(): Promise<void> {
     try {
       if (this.hub) {
         this.hub.offAll();
         void this.hub.disconnect();
       }
     } catch {
-      // ignore disconnect errors on cleanup
+      console.log("error");
     }
 
+    // Limpiar base de datos
+    await db.games.clear();
+
+    // await db.delete(); // Borra la base de datos física del disco
+    //await db.open();
+
+    // Limpiar localStorage (solo para auth y flags pequeños)
+    localStorage.removeItem("currentVersionGame");
     this.authToken = "";
-    this.version = 0;
     this.matchId = "";
     this.animationsInProgress = [];
-    this.connectionStatus = 0;
-    this.listenerVersion = () => {};
-    this.listenerStatus = () => {};
 
-    const keysToKeep = new Set(["playerId"]);
-    const keysToDelete: string[] = [];
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key) continue;
-      const isVersionStateKey = /^\d+$/.test(key);
-      const isSessionKey =
-        key === "auth-jbearer-token" ||
-        key === "playerName" ||
-        isVersionStateKey;
-
-      if (isSessionKey && !keysToKeep.has(key)) {
-        keysToDelete.push(key);
-      }
-    }
-
-    keysToDelete.forEach((key) => localStorage.removeItem(key));
+    // Resto de la lógica de limpieza...
   }
 
-  getState = (): Game | undefined => {
-    const stored = localStorage.getItem(this.version.toString());
-    if (stored) {
-      return this.normalizeGame(JSON.parse(stored));
-    } else {
-      return undefined;
-    }
-  };
-
-  getLastStateFromQueue(): Game {
-    const baseState = this.justGetVersionState(this.version);
-
-    if (!baseState) {
-      throw new Error(
-        `No state found for current version ${this.version}. Cannot resolve last state.`,
-      );
-    }
-
-    const lastState = this.findLastExistingState(baseState.version, baseState);
-
-    return lastState;
+  async getState(): Promise<Game | undefined> {
+    const currentVersion = this.getCurrentVersionGame();
+    const state = await db.games.get([this.matchId, currentVersion]);
+    return state ? this.normalizeGame(state) : undefined;
   }
 
-  private findLastExistingState(version: number, lastKnownState: Game): Game {
-    const nextState = this.justGetVersionState(version + 1);
-    if (!nextState) {
-      return lastKnownState;
-    }
+  async getLastStateFromQueue(): Promise<Game | undefined> {
+    return await db.getLastState(this.matchId);
+  }
 
-    return this.findLastExistingState(nextState.version, nextState);
+  goToNextVersionState(): Game | undefined {
+    if (!this.areAnimationsInProgress()) {
+      return this.goToVersionState(this.getVersion() + 1);
+    }
+    return undefined;
   }
 
   goToVersionState(stateVersion: number): Game | undefined {
@@ -138,46 +109,39 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     console.log("try Going to next version state:", stateVersion);
     if (stored) {
       const versionGame = this.normalizeGame(JSON.parse(stored));
-      this.version = versionGame.version;
-      this.listenerVersion();
+      this.setCurrentVersionGame(versionGame.version);
       return versionGame;
     } else {
       return undefined;
     }
   }
 
-  justGetVersionState(stateVersion: number): Game | undefined {
-    const stored = localStorage.getItem(stateVersion.toString());
-    console.log("try Going to next version state:", stateVersion);
-    if (stored) {
-      const versionGame = this.normalizeGame(JSON.parse(stored));
-      return versionGame;
-    } else {
-      return undefined;
-    }
+  // Helper para obtener una versión específica
+  async getGameFromVersion(stateVersion: number): Promise<Game | undefined> {
+    const state = await db.games.get([this.matchId, stateVersion]);
+    return state;
   }
 
-  goToNextVersionState(): Game | undefined {
-    if (!this.areAnimationsInProgress()) {
-      return this.goToVersionState(this.version + 1);
-    }
-    return undefined;
+  // Para saber si hay una versión nueva (cola de estados)
+  async existsNewVersionState(): Promise<boolean> {
+    const nextVersion = this.getCurrentVersionGame() + 1;
+    const count = await db.games.where("version").equals(nextVersion).count();
+    return count > 0;
   }
 
-  save(state: Game): void {
-    console.log("Saving state to localStorage with version:", state.version);
-    localStorage.setItem(state.version.toString(), JSON.stringify(state));
-    if (!this.areAnimationsInProgress()) {
-      //this.goToNextVersionState();
-    } else {
+  async save(state: Game): Promise<void> {
+    console.log("Guardando estado en IndexedDB versión:", state.version);
+    // Dexie guarda el objeto directamente, no hace falta JSON.stringify
+    await db.games.put(state);
+
+    if (this.areAnimationsInProgress()) {
       console.log(
-        "State saved but animations are in progress. Version update deferred.",
-        this.animationsInProgress,
+        "Estado guardado, pero animaciones en progreso. Esperando...",
       );
     }
   }
 
-  getVersion = (): number => this.version;
+  getVersion = (): number => this.getCurrentVersionGame();
 
   getConnectionStatus = (): number => this.connectionStatus;
 
@@ -249,9 +213,8 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
   }
 
   async addStatesToTheQueue(states: Game[]): Promise<void> {
-    states.forEach((state) => {
-      localStorage.setItem(state.version.toString(), JSON.stringify(state));
-    });
+    // bulkPut es muy rápido para insertar múltiples estados de golpe
+    await db.games.bulkPut(states);
   }
 
   async addAnimationInProgress(animationId: string): Promise<void> {
@@ -300,6 +263,20 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
 
   setPlayerName(user: string): void {
     localStorage.setItem("playerName", user.trim());
+  }
+
+  getCurrentVersionGame(): number {
+    const stored = localStorage.getItem("currentVersionGame");
+    if (stored) {
+      return Number(stored);
+    } else {
+      return 0;
+    }
+  }
+
+  setCurrentVersionGame(version: number): void {
+    localStorage.setItem("currentVersionGame", version.toString());
+    this.listenerVersion();
   }
 
   private normalizeGame(parsed: unknown): Game {

@@ -42,11 +42,7 @@ function App() {
               <Route path="/lobby" element={<GameLobby />} />
               <Route path="/photos" element={<UploadPhotos />} />
               <Route path="/chat" element={<Chat />} />
-              {/* Unirse a partida online */}
-              {/* Modo offline (local) */}
-              <Route path="/offline" element={<GameBoard />} />
-              {/* Modo online multijugador - URL: /online?level=4&gameName=mi-sala */}
-              <Route path="/online" element={<GameBoard />} />
+              <Route path="/gameboard" element={<GameBoard />} />
             </Route>
           </Route>
         </Routes>

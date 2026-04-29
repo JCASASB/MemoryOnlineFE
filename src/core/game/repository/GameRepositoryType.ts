@@ -3,11 +3,10 @@ import type { Game } from "../domain/entities/Game";
 export interface GameRepositoryType {
   save(state: Game): void;
   addStatesToTheQueue(states: Game[]): void;
-  getState(): Game | undefined;
-  getLastStateFromQueue(): Game;
+  getState(): Promise<Game | undefined>;
+  getLastStateFromQueue(): Promise<Game | undefined>;
   goToNextVersionState(): Game | undefined;
-  justGetVersionState(stateVersion: number): Game | undefined;
-  goToVersionState(stateVersion: number): Game | undefined;
+  getGameFromVersion(stateVersion: number): Promise<Game | undefined>;
   getVersion(): number;
   subscribeToVersion(callback: () => void): () => void;
   getConnectionStatus(): number;
@@ -22,4 +21,5 @@ export interface GameRepositoryType {
   addAnimationInProgress(animationId: string): Promise<void>;
   areAnimationsInProgress(): boolean;
   setMatchId(matchId: string): void;
+  existsNewVersionState(): Promise<boolean>;
 }

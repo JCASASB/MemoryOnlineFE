@@ -83,7 +83,9 @@ export const CreateGame = () => {
     createGameUC(Number(nivel), sala).then(() => {
       joinGameUC(sala, trimmedUsuario).then(() => {
         // Navegar a la sala de juego después de unirse
-        navigate(`/online?level=${nivel}&gameName=${encodeURIComponent(sala)}`);
+        navigate(
+          `/gameboard?level=${nivel}&gameName=${encodeURIComponent(sala)}`,
+        );
       });
     });
   };
