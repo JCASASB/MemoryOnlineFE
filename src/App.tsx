@@ -10,6 +10,7 @@ import { Layout } from "./ui/components/layout/Layout";
 import { PrivateRoute } from "./ui/components/PrivateRoute";
 import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import PreventPullToRefresh from "./ui/PreventPullToRefresh";
 
 function HandleExternalLinkRedirect() {
   const navigate = useNavigate();
@@ -31,23 +32,25 @@ function HandleExternalLinkRedirect() {
 
 function App() {
   return (
-    <HashRouter>
-      <DependencyProvider>
-        <HandleExternalLinkRedirect />
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/login" element={<Login />} />
-            <Route element={<PrivateRoute />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/lobby" element={<GameLobby />} />
-              <Route path="/photos" element={<UploadPhotos />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/gameboard" element={<GameBoard />} />
+    <PreventPullToRefresh>
+      <HashRouter>
+        <DependencyProvider>
+          <HandleExternalLinkRedirect />
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/login" element={<Login />} />
+              <Route element={<PrivateRoute />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/lobby" element={<GameLobby />} />
+                <Route path="/photos" element={<UploadPhotos />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/gameboard" element={<GameBoard />} />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
-      </DependencyProvider>
-    </HashRouter>
+          </Routes>
+        </DependencyProvider>
+      </HashRouter>
+    </PreventPullToRefresh>
   );
 }
 
