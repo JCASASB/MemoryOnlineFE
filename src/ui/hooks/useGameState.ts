@@ -10,36 +10,40 @@ export const useGameState = () => {
 
   const { getNextStateUseCase } = useDependencies();
 
-  const workerRef = useRef(null);
+  // 1. Tipamos el Ref correctamente para que acepte Worker o null
+  const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    // Instanciar el worker usando la sintaxis de URL de módulo (compatible con Vite/Webpack 5)
-    workerRef.current = new Worker(new URL("./dbWorker.js", import.meta.url), {
-      type: "module",
-    });
+    // 2. Creamos la instancia en una variable local para asegurar que no sea null ante TS
+    const workerInstance = new Worker(
+      new URL("./dbWorker.js", import.meta.url),
+      { type: "module" },
+    );
 
-    // Escuchar mensajes del worker
-    workerRef.current.onmessage = async (event) => {
+    workerRef.current = workerInstance;
+
+    // 3. Tipamos el evento como MessageEvent para evitar el error de 'any'
+    workerInstance.onmessage = async (event: MessageEvent) => {
       if (event.data.type === "UPDATE_READY") {
         console.log("Notificación del worker:", event.data.payload);
-        // Aquí disparas la actualización de tu estado de React
 
         const state = await getNextStateUseCase.execute();
         if (state) {
-          console.log(`Estado actualizado desde el contador:  `, state);
+          console.log(`Estado actualizado desde el contador: `, state);
           setStateGame(state);
         }
       }
     };
 
-    // Iniciar el proceso
-    workerRef.current.postMessage("start");
+    // 4. Usamos la instancia local para enviar el mensaje inicial
+    workerInstance.postMessage("start");
 
     // Limpieza al desmontar el componente
     return () => {
-      workerRef.current.terminate();
+      workerInstance.terminate();
+      workerRef.current = null;
     };
-  }, []);
+  }, [getNextStateUseCase]); // Añadida dependencia para consistencia
 
   return {
     stateGame: stateGame,
