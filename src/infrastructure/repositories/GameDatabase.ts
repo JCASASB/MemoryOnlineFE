@@ -60,6 +60,21 @@ export class GameDatabase extends Dexie {
     }
   }
 
+  async saveGames(idMatch: string, games: Game[]): Promise<void> {
+    try {
+      // Usamos 'bulkPut' con la estructura que definiste
+      const items = games.map((game) => ({
+        idMatch: idMatch,
+        version: game.version,
+        stateBoard: game,
+      }));
+      await this.games.bulkPut(items);
+    } catch (error) {
+      console.error("Error al guardar varios en IndexedDB:", error);
+      throw error;
+    }
+  }
+
   // IMPORTANTE: Para recuperar el juego luego
   async getGame(idMatch: string, version: number): Promise<Game | undefined> {
     const record = await this.games.get([idMatch, version]);

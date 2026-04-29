@@ -120,35 +120,35 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     return record;
   }
 
-  // Para saber si hay una versión nueva (cola de estados)
-  async existsNewVersionState(): Promise<boolean> {
-    const nextVersion = this.getCurrentVersionGame() + 1;
-    const count = await db.games.where("version").equals(nextVersion).count();
-    return count > 0;
-  }
-
   async saveStateToQueue(state: Game): Promise<void> {
     const matchId = await this.getMatchId();
     await db.saveGame(matchId, state);
   }
 
-  async processStateFromQueue(): Promise<Game> {
-    if (this.areAnimationsInProgress()) {
-      console.log(
-        "Estado guardado, pero animaciones en progreso. Esperando...",
-      );
-    }
+  async processStateFromQueue(): Promise<Game | undefined> {
+    if (!this.areAnimationsInProgress()) {
+      const version = await db.getAppliedVersion();
+      const matchId = await db.getMatchId();
 
-    const version = await db.getAppliedVersion();
-    const matchId = await this.getMatchId();
-    const record = await db.getGame(matchId, version + 1);
+      if (!matchId) {
+        throw new Error("Match ID not found");
+      }
 
-    if (record) {
+      const record = await db.getGame(matchId, version + 1);
+
+      if (!record) {
+        throw new Error("No state found in queue for version: " + version);
+      }
+
       this.setCurrentVersionGame(record.version);
       return record;
+    } else {
+      console.log(
+        "Cannot process state from queue because animations are in progress:",
+        this.animationsInProgress,
+      );
+      return undefined;
     }
-
-    throw new Error("No state found in queue for version: " + version);
   }
 
   getConnectionStatus = (): number => this.connectionStatus;
@@ -192,44 +192,9 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     await this.hub.sendUpdateStateGame(state, matchId);
   }
 
-  convertJsonGameToObject(jsonString: string): Game {
-    const parsed = JSON.parse(jsonString);
-    return this.normalizeGame(parsed);
-  }
-
-  convertJsonGamesToObject(payload: unknown): Game[] {
-    if (payload === null || payload === undefined) {
-      return [];
-    }
-
-    try {
-      const parsed =
-        typeof payload === "string"
-          ? payload.trim().length === 0
-            ? []
-            : JSON.parse(payload)
-          : payload;
-      const rawGames = Array.isArray(parsed)
-        ? parsed
-        : Array.isArray(parsed?.games)
-          ? parsed.games
-          : [];
-      return rawGames.map((g: unknown) => this.normalizeGame(g));
-    } catch (error) {
-      console.warn("Invalid games JSON payload received from server:", error);
-      return [];
-    }
-  }
-
   async addStatesToTheQueue(states: Game[]): Promise<void> {
     const matchId = await this.getMatchId();
-    // bulkPut es muy rápido para insertar múltiples estados de golpe
-    const items = states.map((s, idx) => ({
-      idMatch: (s as any).idMatch ?? matchId,
-      version: typeof s.version === "number" ? s.version : idx,
-      stateBoard: s,
-    }));
-    await db.games.bulkPut(items);
+    await db.saveGames(matchId, states);
   }
 
   async addAnimationInProgress(animationId: string): Promise<void> {

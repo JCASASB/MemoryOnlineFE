@@ -2,7 +2,7 @@ import type { Game } from "../domain/entities/Game";
 
 export interface GameRepositoryType {
   saveStateToQueue(state: Game): void;
-  processStateFromQueue(): Promise<Game>;
+  processStateFromQueue(): Promise<Game | undefined>;
   addStatesToTheQueue(states: Game[]): void;
   getLastStateFromQueue(): Promise<Game | undefined>;
   goToNextVersionState(): Promise<Game | undefined>;
@@ -20,5 +20,4 @@ export interface GameRepositoryType {
   addAnimationInProgress(animationId: string): Promise<void>;
   areAnimationsInProgress(): boolean;
   setMatchId(matchId: string): Promise<void>;
-  existsNewVersionState(): Promise<boolean>;
 }
