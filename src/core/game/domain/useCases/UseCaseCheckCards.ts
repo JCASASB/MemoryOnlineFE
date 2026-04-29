@@ -7,11 +7,6 @@ export class UseCaseCheckCards {
   execute(game: Game): Game | undefined {
     const cardsRevealedAndNotMatched = this.getCardsWithStateFaceUp(game);
 
-    console.log(
-      "Cartas reveladas y no emparejadas:",
-      cardsRevealedAndNotMatched,
-    );
-
     if (cardsRevealedAndNotMatched.length === 2) {
       const cards = this.checkMatch(game.cards, cardsRevealedAndNotMatched);
 

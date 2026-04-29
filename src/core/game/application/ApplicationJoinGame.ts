@@ -18,12 +18,16 @@ export class ApplicationJoinGame {
 
     const lastState = await this.repository.getLastStateFromQueue();
 
+    if (!lastState) {
+      throw new Error("Game state not found");
+    }
+
     const newState = this.useCase.execute(lastState, playerName);
 
-    await this.repository.save(newState);
+    await this.repository.saveStateToQueue(newState);
 
     await this.repository.joinGameToServer(matchId);
-    //console.log("New state after joining game:", newState);
+
     await this.repository.updateStateToServer(newState);
   }
 }

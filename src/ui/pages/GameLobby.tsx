@@ -113,7 +113,9 @@ export const GameLobby = () => {
     savePlayerName(trimmedUsuario);
     createGameUC(Number(nivel), salaName).then(() => {
       joinGameUC(salaName, trimmedUsuario).then(() => {
-        navigate(`/online?level=${nivel}&gameName=${encodeURIComponent(salaName)}`);
+        navigate(
+          `/gameboard?level=${nivel}&gameName=${encodeURIComponent(salaName)}`,
+        );
       });
     });
   };
@@ -125,7 +127,7 @@ export const GameLobby = () => {
     const trimmedUsuario = usuario.trim();
     if (!trimmedSala || !trimmedUsuario) return;
     savePlayerName(trimmedUsuario);
-    navigate(`/online?gameName=${encodeURIComponent(trimmedSala)}`);
+    navigate(`/gameboard?gameName=${encodeURIComponent(trimmedSala)}`);
     setTimeout(() => {
       joinGameUC(trimmedSala, trimmedUsuario).catch((err) =>
         console.error("Error joining game:", err),
@@ -136,8 +138,12 @@ export const GameLobby = () => {
   return (
     <Wrapper>
       <Tabs>
-        <TabButton $active={tab === "crear"} onClick={() => setTab("crear")}>Crear partida</TabButton>
-        <TabButton $active={tab === "unirse"} onClick={() => setTab("unirse")}>Unirse a partida</TabButton>
+        <TabButton $active={tab === "crear"} onClick={() => setTab("crear")}>
+          Crear partida
+        </TabButton>
+        <TabButton $active={tab === "unirse"} onClick={() => setTab("unirse")}>
+          Unirse a partida
+        </TabButton>
       </Tabs>
       {tab === "crear" ? (
         <Form onSubmit={handleCreate}>

@@ -10,14 +10,14 @@ export class ApplicationCheckCards {
   ) {}
 
   async execute(stateVersion: number): Promise<number> {
-    const state = await this.repository.justGetVersionState(stateVersion);
+    const state = await this.repository.getGameFromVersion(stateVersion);
 
     if (state) {
       const game = this.useCase.execute(state);
 
       if (game) {
         await this.repository.updateStateToServer(game);
-        await this.repository.save(game);
+        await this.repository.saveStateToQueue(game);
       }
 
       return game ? game.version : state.version;

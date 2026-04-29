@@ -16,8 +16,6 @@ export class ApplicationFlipCard {
 
     const playerId = state.players.find((p) => p.name === playerName)?.id;
 
-    console.log("this is the playerId, cardId:", playerId, cardId);
-
     if (!playerId) {
       throw new Error(`Player with name ${playerName} not found in game state`);
     }
@@ -25,7 +23,7 @@ export class ApplicationFlipCard {
     const game = this.useCase.execute(state, cardId, playerId);
 
     if (game) {
-      await this.repository.save(game);
+      await this.repository.saveStateToQueue(game);
       await this.repository.updateStateToServer(game);
       return game.version;
     } else {

@@ -5,6 +5,27 @@ import { ConnectionStatus } from "../connection/ConnectionStatus";
 
 const navItems = [
   {
+    label: "Board",
+    path: "/gameboard", // Asegúrate de que esta ruta coincida con tu Router
+    icon: (
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>
+    ),
+  },
+  {
     label: "Fotos",
     path: "/photos",
     icon: (
@@ -110,33 +131,31 @@ export const Layout = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh", // Altura exacta de la pantalla
+        height: "100vh",
         width: "100vw",
-        overflow: "hidden", // Evita el scroll en el contenedor padre
+        overflow: "hidden",
       }}
     >
-      {/* Área con scroll interno */}
       <main
         style={{
-          flex: 1, // Ocupa todo el espacio sobrante
-          overflowY: "auto", // Habilita el scroll solo aquí
-          WebkitOverflowScrolling: "touch", // Suavidad en dispositivos móviles
+          flex: 1,
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         <Outlet />
       </main>
 
-      {/* Navegación fija al final */}
       <nav
         style={{
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
           height: 64,
-          minHeight: 64, // Asegura que no se encoja
+          minHeight: 64,
           background: "#000",
           borderTop: "1px solid rgba(255,255,255,0.08)",
-          paddingBottom: "env(safe-area-inset-bottom)", // Espacio para notch/gestos en móviles
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {navItems.map((item) => {
@@ -153,7 +172,7 @@ export const Layout = () => {
                 alignItems: "center",
                 color: isActive ? "#1e90ff" : "#fff",
                 fontWeight: isActive ? "700" : "400",
-                fontSize: 12,
+                fontSize: 10, // Bajado un poco para que quepan 5 botones cómodamente
                 flex: 1,
                 cursor: "pointer",
                 position: "relative",
@@ -162,13 +181,12 @@ export const Layout = () => {
               {item.icon}
               <span style={{ marginTop: 4 }}>{item.label}</span>
 
-              {/* Badge de Chat */}
               {item.path === "/chat" && unreadCount > 0 && (
                 <span
                   style={{
                     position: "absolute",
                     top: -2,
-                    right: "20%",
+                    right: "10%",
                     background: "#d32f2f",
                     color: "#fff",
                     borderRadius: 10,
@@ -176,20 +194,19 @@ export const Layout = () => {
                     fontSize: 10,
                     minWidth: 16,
                     fontWeight: "bold",
-                    border: "2px solid #000", // Mejora la visibilidad sobre el fondo negro
+                    border: "2px solid #000",
                   }}
                 >
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
 
-              {/* Badge de status connection */}
               {item.path === "/login" && (
                 <div
                   style={{
                     position: "absolute",
                     top: -2,
-                    marginLeft: "60px",
+                    marginLeft: "45px", // Ajustado para el nuevo ancho
                   }}
                 >
                   <ConnectionStatus />

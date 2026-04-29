@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from "uuid";
 
 export class UseCaseFlipCard {
   execute(game: Game, cardId: string, playerId: string): Game | undefined {
-    //  console.log(`[UseCaseFlipCard] Estado actual d:`, game);
     if (this.canClick(game, cardId, playerId)) {
       const cards = this.flipCard(game.cards, cardId);
       const revealedIdCards = this.getCardsRevealedAndNotMatched(cards);

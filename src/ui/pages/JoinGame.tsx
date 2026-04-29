@@ -86,7 +86,7 @@ export const JoinGame = () => {
     // Guardar nombre localmente y navegar de inmediato.
     savePlayerName(trimmedUsuario);
 
-    navigate(`/online?gameName=${encodeURIComponent(trimmedSala)}`);
+    navigate(`/gameboard?gameName=${encodeURIComponent(trimmedSala)}`);
 
     // Ejecutar join después de la navegación en un tick para evitar que
     // la llamada al hub ocurra antes de que la ruta cambie.
