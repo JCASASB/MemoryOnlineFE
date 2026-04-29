@@ -17,7 +17,6 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
 
   private hubUrl: string;
   private authToken: string = "";
-  private matchId: string = "";
   private animationsInProgress: string[] = [];
   private connectionStatus: number = 0;
   private hub!: SignalRGameHub;
@@ -42,7 +41,7 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     // Registrar callbacks antes de conectar para no perder mensajes inmediatos
 
     this.hub.onUpdateStates((games: Game[]) => {
-      games.forEach((game) => this.save(game));
+      games.forEach((game) => this.saveStateToQueue(game));
     });
 
     this.hub.setConnectionStatus((status: number) => {
@@ -74,6 +73,7 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
 
     // Limpiar base de datos
     await db.games.clear();
+    await db.settings.clear();
 
     // await db.delete(); // Borra la base de datos física del disco
     //await db.open();
@@ -81,36 +81,33 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     // Limpiar localStorage (solo para auth y flags pequeños)
     localStorage.removeItem("currentVersionGame");
     this.authToken = "";
-    this.matchId = "";
     this.animationsInProgress = [];
 
     // Resto de la lógica de limpieza...
   }
 
-  async getState(): Promise<Game | undefined> {
-    const currentVersion = this.getCurrentVersionGame();
-    const state = await db.games.get([this.matchId, currentVersion]);
-    return state ? this.normalizeGame(state) : undefined;
-  }
-
   async getLastStateFromQueue(): Promise<Game | undefined> {
-    return await db.getLastState(this.matchId);
+    const matchId = await this.getMatchId();
+    console.log("Getting last state from queue for matchId:", matchId);
+    return await db.getLastState(matchId);
   }
 
-  goToNextVersionState(): Game | undefined {
+  async goToNextVersionState(): Promise<Game | undefined> {
     if (!this.areAnimationsInProgress()) {
-      return this.goToVersionState(this.getVersion() + 1);
+      const versionApplied = await db.getAppliedVersion();
+
+      return this.goToVersionState(versionApplied + 1);
     }
     return undefined;
   }
 
-  goToVersionState(stateVersion: number): Game | undefined {
-    const stored = localStorage.getItem(stateVersion.toString());
+  async goToVersionState(stateVersion: number): Promise<Game | undefined> {
+    const matchId = await this.getMatchId();
+    const stored = await db.getGame(matchId, stateVersion);
     console.log("try Going to next version state:", stateVersion);
     if (stored) {
-      const versionGame = this.normalizeGame(JSON.parse(stored));
-      this.setCurrentVersionGame(versionGame.version);
-      return versionGame;
+      await db.setAppliedVersion(stored.version);
+      return stored;
     } else {
       return undefined;
     }
@@ -118,8 +115,9 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
 
   // Helper para obtener una versión específica
   async getGameFromVersion(stateVersion: number): Promise<Game | undefined> {
-    const state = await db.games.get([this.matchId, stateVersion]);
-    return state;
+    const matchId = await this.getMatchId();
+    const record = await db.getGame(matchId, stateVersion);
+    return record;
   }
 
   // Para saber si hay una versión nueva (cola de estados)
@@ -129,19 +127,29 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     return count > 0;
   }
 
-  async save(state: Game): Promise<void> {
-    console.log("Guardando estado en IndexedDB versión:", state.version);
-    // Dexie guarda el objeto directamente, no hace falta JSON.stringify
-    await db.games.put(state);
+  async saveStateToQueue(state: Game): Promise<void> {
+    const matchId = await this.getMatchId();
+    await db.saveGame(matchId, state);
+  }
 
+  async processStateFromQueue(): Promise<Game> {
     if (this.areAnimationsInProgress()) {
       console.log(
         "Estado guardado, pero animaciones en progreso. Esperando...",
       );
     }
-  }
 
-  getVersion = (): number => this.getCurrentVersionGame();
+    const version = await db.getAppliedVersion();
+    const matchId = await this.getMatchId();
+    const record = await db.getGame(matchId, version + 1);
+
+    if (record) {
+      this.setCurrentVersionGame(record.version);
+      return record;
+    }
+
+    throw new Error("No state found in queue for version: " + version);
+  }
 
   getConnectionStatus = (): number => this.connectionStatus;
 
@@ -180,7 +188,8 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
   }
 
   async updateStateToServer(state: Game): Promise<void> {
-    await this.hub.sendUpdateStateGame(state, this.matchId);
+    const matchId = await this.getMatchId();
+    await this.hub.sendUpdateStateGame(state, matchId);
   }
 
   convertJsonGameToObject(jsonString: string): Game {
@@ -213,8 +222,14 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
   }
 
   async addStatesToTheQueue(states: Game[]): Promise<void> {
+    const matchId = await this.getMatchId();
     // bulkPut es muy rápido para insertar múltiples estados de golpe
-    await db.games.bulkPut(states);
+    const items = states.map((s, idx) => ({
+      idMatch: (s as any).idMatch ?? matchId,
+      version: typeof s.version === "number" ? s.version : idx,
+      stateBoard: s,
+    }));
+    await db.games.bulkPut(items);
   }
 
   async addAnimationInProgress(animationId: string): Promise<void> {
@@ -252,8 +267,16 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     return StateCard.FaceDown;
   }
 
-  setMatchId(matchId: string): void {
-    this.matchId = matchId;
+  async setMatchId(matchId: string): Promise<void> {
+    await db.setMatchId(matchId);
+  }
+
+  async getMatchId(): Promise<string> {
+    const matchId = await db.getMatchId();
+    if (!matchId) {
+      throw new Error("Match ID not found");
+    }
+    return matchId;
   }
 
   setAuthToken(token: string): void {

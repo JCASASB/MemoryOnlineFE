@@ -17,7 +17,7 @@ export class ApplicationCheckCards {
 
       if (game) {
         await this.repository.updateStateToServer(game);
-        await this.repository.save(game);
+        await this.repository.saveStateToQueue(game);
       }
 
       return game ? game.version : state.version;

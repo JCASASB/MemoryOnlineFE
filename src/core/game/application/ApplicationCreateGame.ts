@@ -10,7 +10,10 @@ export class ApplicationCreateGame {
   async execute(level: number, gameName: string): Promise<void> {
     const game = this.useCase.execute(level, gameName);
 
-    this.repository.save(game);
+    this.repository.saveStateToQueue(game);
+
+    //dejamos que lo haga el timer
+    //await this.repository.processStateFromQueue();
 
     await this.repository.createGameToServer(game);
   }

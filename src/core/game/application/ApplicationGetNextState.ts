@@ -5,7 +5,7 @@ export class ApplicationGetNextState {
   constructor(private readonly repository: GameRepositoryType) {}
 
   async execute(): Promise<Game | undefined> {
-    const state = await this.repository.goToNextVersionState();
-    return state;
+    const newState = await this.repository.goToNextVersionState();
+    return newState;
   }
 }

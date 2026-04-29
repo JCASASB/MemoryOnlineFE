@@ -26,7 +26,7 @@ export const useGameState = () => {
 
         const state = await getNextStateUseCase.execute();
         if (state) {
-          // console.log(`Estado actualizado desde el contador:  `, state);
+          console.log(`Estado actualizado desde el contador:  `, state);
           setStateGame(state);
         }
       }

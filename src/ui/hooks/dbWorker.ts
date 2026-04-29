@@ -9,8 +9,10 @@ self.onmessage = (e) => {
       try {
         // 1. Obtenemos la última versión guardada (ejemplo: la más alta)
         const lastGame = await db.games.orderBy("version").last();
+        const versionApplied = await db.getAppliedVersion();
 
-        if (lastGame) {
+        // Si la versión aplicada es menor que la última versión en DB, notificamos
+        if (lastGame && versionApplied < lastGame.version) {
           // 2. Si existe un juego, notificamos al hilo principal
           self.postMessage({
             type: "UPDATE_READY",
