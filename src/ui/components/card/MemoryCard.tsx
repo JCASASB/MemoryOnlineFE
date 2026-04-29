@@ -61,7 +61,6 @@ const CardContainer = styled.div<{
 `;
 
 export const MemoryCard = ({ id, value, stateCard, flip }: MemoryCardProps) => {
-  //console.log("Renderizando carta:", id, "Valor:", value, "Revelada:", isRevealed, "Emparejada:", isMatched);
   const { addAnimationInProgress, removeAnimationInProgress } = useAnimations();
 
   const transitionEvent = whichTransitionEventF();
@@ -73,7 +72,6 @@ export const MemoryCard = ({ id, value, stateCard, flip }: MemoryCardProps) => {
     setIsAnimating(true);
     if (stateCard === StateCard.FaceUp) {
       addAnimationInProgress(id);
-      console.log("Animación de volteo iniciada para la carta:", id);
     }
   }, [addAnimationInProgress, stateCard, id]);
 
@@ -82,7 +80,6 @@ export const MemoryCard = ({ id, value, stateCard, flip }: MemoryCardProps) => {
 
     if (stateCard === StateCard.FaceUp) {
       removeAnimationInProgress(id);
-      console.log("Animación de volteo finalizada para la carta:", id);
     }
   }, [removeAnimationInProgress, stateCard, id]);
 
