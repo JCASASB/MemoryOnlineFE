@@ -1,7 +1,4 @@
-import { Card } from "../../core/game/domain/entities/Card";
 import type { Game } from "../../core/game/domain/entities/Game";
-import { Player } from "../../core/game/domain/entities/Player";
-import { StateCard } from "../../core/game/domain/entities/StateCard";
 import type { GameRepositoryType } from "../../core/game/repository/GameRepositoryType";
 import { SignalRGameHub } from "../signalr/SignalRGameHub";
 import { db } from "./GameDatabase";
@@ -244,21 +241,6 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
 
   areAnimationsInProgress(): boolean {
     return this.animationsInProgress.length > 0;
-  }
-
-  private normalizeCardState(state: unknown): StateCard {
-    if (state === StateCard.FaceDown) return StateCard.FaceDown;
-    if (state === StateCard.FaceUp) return StateCard.FaceUp;
-    if (state === StateCard.Matched) return StateCard.Matched;
-
-    if (typeof state === "string") {
-      const normalized = state.toLowerCase();
-      if (normalized === "facedown") return StateCard.FaceDown;
-      if (normalized === "faceup") return StateCard.FaceUp;
-      if (normalized === "matched") return StateCard.Matched;
-    }
-
-    return StateCard.FaceDown;
   }
 
   async setMatchId(matchId: string): Promise<void> {
