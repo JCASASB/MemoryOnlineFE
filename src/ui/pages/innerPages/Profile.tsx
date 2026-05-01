@@ -88,7 +88,7 @@ const LogoutButton = styled.button`
 
 export const Profile = () => {
   const navigate = useNavigate();
-  const { playerName, logout } = usePlayer();
+  const { playerName } = usePlayer();
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -115,7 +115,6 @@ export const Profile = () => {
 
   const handleLogout = async () => {
     if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-      await logout?.(); // Ejecuta la limpieza de tokens e IndexedDB
       navigate("/login");
     }
   };
