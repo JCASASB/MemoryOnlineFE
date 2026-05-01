@@ -66,42 +66,20 @@ export const MemoryCard = ({ id, value, stateCard, flip }: MemoryCardProps) => {
   const transitionEvent = whichTransitionEventF();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isAnimatingThisCard, setIsAnimatingThisCard] = useState(false);
 
   const startAnimation = useCallback(() => {
-    setIsAnimating(true);
-    if (stateCard === StateCard.FaceUp) {
-      addAnimationInProgress(id);
-    }
-  }, [addAnimationInProgress, stateCard, id]);
+    setIsAnimatingThisCard(true);
+    addAnimationInProgress(id);
+  }, [addAnimationInProgress, id]);
 
   const finishAnimation = useCallback(() => {
-    setIsAnimating(false);
-
-    if (stateCard === StateCard.FaceUp) {
-      removeAnimationInProgress(id);
-    }
-  }, [removeAnimationInProgress, stateCard, id]);
+    setIsAnimatingThisCard(false);
+    removeAnimationInProgress(id);
+  }, [removeAnimationInProgress, id]);
 
   const handleClick = () => {
-    console.log(
-      "antes de handleClick - id:",
-      id,
-      "stateCard:",
-      StateCard[stateCard],
-      "isAnimating:",
-      isAnimating,
-    );
-
-    if (stateCard === StateCard.FaceDown && !isAnimating) {
-      console.log(
-        "Carta clickeada:",
-        id,
-        "Estado actual:",
-        stateCard,
-        "isanimating:",
-        isAnimating,
-      );
+    if (stateCard === StateCard.FaceDown && !isAnimatingThisCard) {
       flip(id);
     }
   };
@@ -131,7 +109,7 @@ export const MemoryCard = ({ id, value, stateCard, flip }: MemoryCardProps) => {
     <CardContainer
       ref={containerRef}
       $stateCard={stateCard}
-      $isAnimating={isAnimating}
+      $isAnimating={isAnimatingThisCard}
       data-state={StateCard[stateCard]}
       onClick={handleClick}
     >

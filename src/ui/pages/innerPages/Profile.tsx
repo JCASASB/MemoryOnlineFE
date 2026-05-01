@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { usePlayer } from "../../hooks/usePlayer";
 import type { PlayerStats } from "./PlayerStats";
 
-const API_URL = "https://tu-juego.com"; // Tu URL de .NET
+const STATS_URL = import.meta.env.VITE_LOGIN_URL + "/api/profiles/stats"; // Tu URL de .NET
 
 const ProfileWrapper = styled.div`
   display: flex;
@@ -92,10 +92,12 @@ export const Profile = () => {
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const playerId = playerName || ""; // Asegúrate de que playerName no sea undefined
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${API_URL}/${playerName}`);
+        const response = await fetch(`${STATS_URL}/${playerId}`);
         if (!response.ok) throw new Error("Error en la petición");
         const data = await response.json();
         setStats(data);

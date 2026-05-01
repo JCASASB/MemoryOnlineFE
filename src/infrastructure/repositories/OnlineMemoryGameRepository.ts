@@ -11,6 +11,7 @@ import { db } from "./GameDatabase";
  * las llamadas al hub de SignalR para sincronizar el estado
  * con otros jugadores en tiempo real.
  */
+
 export class OnlineMemoryGameRepository implements GameRepositoryType {
   private listenerStatus: () => void = () => {};
   private listenerVersion: () => void = () => {};
@@ -21,8 +22,28 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
   private connectionStatus: number = 0;
   private hub!: SignalRGameHub;
 
+  PLAYER_ID_KEY = "playerId";
+  PLAYER_NAME_KEY = "playerName";
+
   constructor(hubUrl: string) {
     this.hubUrl = hubUrl;
+  }
+
+  getOrCreatePlayerId(): string {
+    let id = localStorage.getItem(this.PLAYER_ID_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(this.PLAYER_ID_KEY, id);
+    }
+    return id;
+  }
+
+  savePlayerName(name: string) {
+    localStorage.setItem(this.PLAYER_NAME_KEY, name);
+  }
+
+  getPlayerName(): string {
+    return localStorage.getItem(this.PLAYER_NAME_KEY) ?? "";
   }
 
   // ─── Conexión al hub ───────────────────────────────────────
@@ -198,7 +219,15 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
   }
 
   async addAnimationInProgress(animationId: string): Promise<void> {
-    this.animationsInProgress.push(animationId);
+    if (!this.animationsInProgress.includes(animationId)) {
+      this.animationsInProgress.push(animationId);
+      console.log(
+        "Added animation:",
+        animationId,
+        "Total:",
+        this.animationsInProgress,
+      );
+    }
   }
 
   async removeAnimationInProgress(animationIds: string[]): Promise<void> {
