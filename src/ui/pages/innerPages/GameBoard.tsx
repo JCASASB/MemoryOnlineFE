@@ -1,12 +1,11 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { usePlayer } from "../hooks/usePlayer";
-import { MemoryCard } from "../components/card/MemoryCard";
-import { ScoreBoard } from "../components/scoreBoard/ScoreBoard";
-import { LinkShare } from "../components/linkShare/LinkShare";
-import { useGameState } from "../hooks/useGameState";
-import { useUCs } from "../hooks/useUCs";
+import { usePlayer } from "../../hooks/usePlayer";
+import { MemoryCard } from "../../components/card/MemoryCard";
+import { ScoreBoard } from "../../components/scoreBoard/ScoreBoard";
+import { useGameState } from "../../hooks/useGameState";
+import { useUCs } from "../../hooks/useUCs";
 
 const BoardWrapper = styled.div`
   display: flex;
@@ -45,6 +44,7 @@ const Grid = styled.div<{ $columns: number }>`
 `;
 
 export const GameBoard = () => {
+  console.log("Renderizando GameBoard");
   const navigate = useNavigate();
   const { playerName } = usePlayer();
   const { flipCardUC, checkCardsUC } = useUCs();
@@ -85,7 +85,6 @@ export const GameBoard = () => {
       {stateGame.players.length < 2 && (
         <div style={{ textAlign: "center" }}>
           <Header>Esperando jugador...</Header>
-          <LinkShare />
         </div>
       )}
 

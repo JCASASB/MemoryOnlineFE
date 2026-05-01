@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { useDependencies } from "../context/useDependencies";
+import { useDependencies } from "../../context/useDependencies";
 
 const LOGIN_URL = import.meta.env.VITE_LOGIN_URL + "/Auth/login";
 

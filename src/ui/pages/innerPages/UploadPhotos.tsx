@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import { uploadPhotoToS3 } from "../../infrastructure/s3/S3PhotoUploader";
-import { usePlayer } from "../hooks/usePlayer";
+import { uploadPhotoToS3 } from "../../../infrastructure/s3/S3PhotoUploader";
+import { usePlayer } from "../../hooks/usePlayer";
 
 const Wrapper = styled.div`
   display: flex;
@@ -80,7 +80,11 @@ export const UploadPhotos = () => {
   const [uploaded, setUploaded] = useState<string[]>([]);
 
   const previews = useMemo(
-    () => files.map((file) => ({ name: file.name, url: URL.createObjectURL(file) })),
+    () =>
+      files.map((file) => ({
+        name: file.name,
+        url: URL.createObjectURL(file),
+      })),
     [files],
   );
 
@@ -111,7 +115,10 @@ export const UploadPhotos = () => {
       );
 
       const successUrls = results
-        .filter((r): r is PromiseFulfilledResult<{ key: string; url: string }> => r.status === "fulfilled")
+        .filter(
+          (r): r is PromiseFulfilledResult<{ key: string; url: string }> =>
+            r.status === "fulfilled",
+        )
         .map((r) => r.value.url);
 
       const failedCount = results.filter((r) => r.status === "rejected").length;
@@ -119,10 +126,13 @@ export const UploadPhotos = () => {
       setUploaded(successUrls);
 
       if (failedCount > 0) {
-        setError(`Se subieron ${successUrls.length} foto(s), pero fallaron ${failedCount}.`);
+        setError(
+          `Se subieron ${successUrls.length} foto(s), pero fallaron ${failedCount}.`,
+        );
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : "No se pudo subir las fotos.";
+      const message =
+        e instanceof Error ? e.message : "No se pudo subir las fotos.";
       setError(message);
     } finally {
       setIsUploading(false);
@@ -144,7 +154,11 @@ export const UploadPhotos = () => {
         onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
       />
 
-      <Button type="button" onClick={onUpload} disabled={isUploading || !files.length}>
+      <Button
+        type="button"
+        onClick={onUpload}
+        disabled={isUploading || !files.length}
+      >
         {isUploading ? "Subiendo..." : "Subir a S3"}
       </Button>
 

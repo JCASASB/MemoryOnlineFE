@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
-import { usePlayer } from "../hooks/usePlayer";
-import { useUCs } from "../hooks/useUCs";
+import { usePlayer } from "../../hooks/usePlayer";
+import { useUCs } from "../../hooks/useUCs";
 
 const Wrapper = styled.div`
   display: flex;
@@ -148,7 +148,7 @@ export const GameLobby = () => {
       {tab === "crear" ? (
         <Form onSubmit={handleCreate}>
           <Label>
-            Tu nombre
+            Hola {usuario}, quieres crear una sala?
             <Input
               type="text"
               value={usuario}

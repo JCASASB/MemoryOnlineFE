@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import type { ChatMessage } from "../../core/chat/domain/entities/ChatMessage";
-import { useDependencies } from "../context/useDependencies";
-import { usePlayer } from "../hooks/usePlayer";
-import { useUCs } from "../hooks/useUCs";
+import type { ChatMessage } from "../../../core/chat/domain/entities/ChatMessage";
+import { useDependencies } from "../../context/useDependencies";
+import { usePlayer } from "../../hooks/usePlayer";
+import { useUCs } from "../../hooks/useUCs";
 
 const Wrapper = styled.div`
   display: flex;
@@ -139,9 +139,11 @@ export const Chat = () => {
         // Sync any messages that arrived while the page was unmounted
         setMessages(chatRepository.getChatMessages().map(toUiMessage));
 
-        unsubscribe = chatRepository.subscribeToChatMessages((msg: ChatMessage) => {
-          setMessages((prev) => [...prev, toUiMessage(msg)]);
-        });
+        unsubscribe = chatRepository.subscribeToChatMessages(
+          (msg: ChatMessage) => {
+            setMessages((prev) => [...prev, toUiMessage(msg)]);
+          },
+        );
       })
       .catch((error: unknown) => {
         const message =

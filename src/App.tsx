@@ -1,16 +1,17 @@
 import "./App.css";
 import { DependencyProvider } from "./ui/context/DependencyContext";
-import { GameBoard } from "./ui/pages/GameBoard";
-import { GameLobby } from "./ui/pages/GameLobby";
-import { Home } from "./ui/pages/Home";
-import { Login } from "./ui/pages/Login";
-import { UploadPhotos } from "./ui/pages/UploadPhotos";
-import { Chat } from "./ui/pages/Chat";
-import { Layout } from "./ui/components/layout/Layout";
+import { GameBoard } from "./ui/pages/innerPages/GameBoard";
+import { GameLobby } from "./ui/pages/innerPages/GameLobby";
+import { Home } from "./ui/pages/innerPages/Home";
+import { Login } from "./ui/pages/innerPages/Login";
+import { UploadPhotos } from "./ui/pages/innerPages/UploadPhotos";
+import { Chat } from "./ui/pages/innerPages/Chat";
 import { PrivateRoute } from "./ui/components/PrivateRoute";
 import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import PreventPullToRefresh from "./ui/PreventPullToRefresh";
+import { Profile } from "./ui/pages/innerPages/Profile";
+import { Layout } from "./ui/pages/layout/Layout";
 
 function HandleExternalLinkRedirect() {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/photos" element={<UploadPhotos />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/gameboard" element={<GameBoard />} />
+                <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>
           </Routes>
