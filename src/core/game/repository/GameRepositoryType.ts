@@ -6,6 +6,7 @@ export interface GameRepositoryType {
   addStatesToTheQueue(states: Game[]): void;
   getLastStateFromQueue(): Promise<Game | undefined>;
   goToNextVersionState(): Promise<Game | undefined>;
+  goToLastAppliedState(): Promise<Game | undefined>;
   getGameFromVersion(stateVersion: number): Promise<Game | undefined>;
   subscribeToVersion(callback: () => void): () => void;
   getConnectionStatus(): number;

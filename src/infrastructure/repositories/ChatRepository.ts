@@ -13,6 +13,7 @@ export class ChatRepository implements ChatRepositoryType {
   private unreadSubscribers: Array<(count: number) => void> = [];
   private hub?: SignalRGameHub;
   private connected = false;
+  private connectedToken = "";
   private unreadCount = 0;
   private isChatViewActive = false;
   private lastSeenMessageId: string | null = null;
@@ -20,9 +21,17 @@ export class ChatRepository implements ChatRepositoryType {
   constructor(private readonly hubUrl: string) {}
 
   async connect(): Promise<void> {
+    const token = localStorage.getItem("auth-jbearer-token") ?? "";
+
+    // Si el token cambió desde la última conexión, forzar reconexión
+    if (this.connected && this.connectedToken !== token) {
+      this.connected = false;
+      this.hub = undefined;
+    }
+
     if (this.connected) return;
 
-    const token = localStorage.getItem("auth-jbearer-token") ?? "";
+    this.connectedToken = token;
     this.hub = SignalRGameHub.getInstance(this.hubUrl, token);
 
     this.hub.onChatMessage((payload) => {
@@ -64,6 +73,10 @@ export class ChatRepository implements ChatRepositoryType {
     callback: (message: ChatMessage) => void,
   ): () => void {
     this.subscribers.push(callback);
+    // Disparar conexión lazy al suscribirse (token ya disponible si el usuario está logueado)
+    void this.connect().catch((err) =>
+      console.error("[ChatRepository] Error conectando al suscribirse:", err),
+    );
     return () => {
       this.subscribers = this.subscribers.filter((cb) => cb !== callback);
     };

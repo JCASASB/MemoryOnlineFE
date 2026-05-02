@@ -97,7 +97,6 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     //await db.open();
 
     // Limpiar localStorage (solo para auth y flags pequeños)
-    localStorage.removeItem("currentVersionGame");
     this.authToken = "";
     this.animationsInProgress = [];
 
@@ -115,6 +114,15 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
       const versionApplied = await db.getAppliedVersion();
 
       return this.goToVersionState(versionApplied + 1);
+    }
+    return undefined;
+  }
+
+  async goToLastAppliedState(): Promise<Game | undefined> {
+    if (!this.areAnimationsInProgress()) {
+      const versionApplied = await db.getAppliedVersion();
+
+      return this.goToVersionState(versionApplied);
     }
     return undefined;
   }

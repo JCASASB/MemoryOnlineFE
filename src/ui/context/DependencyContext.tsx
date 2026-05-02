@@ -12,6 +12,7 @@ import { UseCaseCheckCards } from "../../core/game/domain/useCases/UseCaseCheckC
 import { ApplicationAnimationInProgressAdd } from "../../core/game/application/ApplicationAnimationInProgresAdd";
 import { ApplicationAnimationInProgressRemove } from "../../core/game/application/ApplicationAnimationInProgresRemove";
 import { ApplicationGetNextState } from "../../core/game/application/ApplicationGetNextState";
+import { ApplicationGetLastAppliedState } from "../../core/game/application/ApplicationGetLastAppliedState";
 import { UseCaseJoinMatch } from "../../core/game/domain/useCases/UseCaseJoinMatch";
 import { ApplicationSendChatMessage } from "../../core/chat/application/ApplicationSendChatMessage";
 import { UseCaseSendChatMessage } from "../../core/chat/domain/useCases/UseCaseSendChatMessage";
@@ -51,6 +52,9 @@ export const DependencyProvider = ({ children }: Props) => {
         new UseCaseJoinMatch(),
       ),
       getNextStateUseCase: new ApplicationGetNextState(onlineRepo),
+      getLastAppliedStateUseCase: new ApplicationGetLastAppliedState(
+        onlineRepo,
+      ),
       applicationAnimationInProgressAdd: new ApplicationAnimationInProgressAdd(
         onlineRepo,
       ),

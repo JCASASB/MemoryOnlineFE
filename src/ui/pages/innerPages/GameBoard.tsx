@@ -1,5 +1,4 @@
-import { useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 import PreventPullToRefresh from "../../PreventPullToRefresh";
 import styled from "styled-components";
 import { usePlayer } from "../../hooks/usePlayer";
@@ -46,19 +45,9 @@ const Grid = styled.div<{ $columns: number }>`
 
 export const GameBoard = () => {
   console.log("Renderizando GameBoard");
-  const navigate = useNavigate();
   const { playerName } = usePlayer();
   const { flipCardUC, checkCardsUC } = useUCs();
   const { stateGame } = useGameState();
-
-  useEffect(() => {
-    if (!playerName) {
-      const next = encodeURIComponent(
-        window.location.hash.replace("#", "") || "/",
-      );
-      navigate(`/login?next=${next}`);
-    }
-  }, [playerName, navigate]);
 
   const stableFlip = (id: string) => {
     flipCardUC(id, playerName)

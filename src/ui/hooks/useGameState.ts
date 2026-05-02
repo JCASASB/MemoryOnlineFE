@@ -8,10 +8,19 @@ import { Game } from "../../core/game/domain/entities/Game";
 export const useGameState = () => {
   const [stateGame, setStateGame] = useState<Game>(new Game("", "", 0, 0));
 
-  const { getNextStateUseCase } = useDependencies();
+  const { getNextStateUseCase, getLastAppliedStateUseCase } = useDependencies();
 
   // 1. Tipamos el Ref correctamente para que acepte Worker o null
   const workerRef = useRef<Worker | null>(null);
+
+  // Carga el último estado persistido al montar
+  useEffect(() => {
+    getLastAppliedStateUseCase.execute().then((lastState) => {
+      if (lastState) {
+        setStateGame(lastState);
+      }
+    });
+  }, [getLastAppliedStateUseCase]);
 
   useEffect(() => {
     // 2. Creamos la instancia en una variable local para asegurar que no sea null ante TS

@@ -7,6 +7,7 @@ import type { ApplicationCheckCards } from "../../core/game/application/Applicat
 import type { ApplicationAnimationInProgressAdd } from "../../core/game/application/ApplicationAnimationInProgresAdd";
 import type { ApplicationAnimationInProgressRemove } from "../../core/game/application/ApplicationAnimationInProgresRemove";
 import type { ApplicationGetNextState } from "../../core/game/application/ApplicationGetNextState";
+import type { ApplicationGetLastAppliedState } from "../../core/game/application/ApplicationGetLastAppliedState";
 import type { ApplicationSendChatMessage } from "../../core/chat/application/ApplicationSendChatMessage";
 import type { ChatRepositoryType } from "../../core/chat/repository/ChatRepositoryType";
 
@@ -18,6 +19,7 @@ export interface MemoryContextType {
   applicationSendChatMessage: ApplicationSendChatMessage;
   chatRepository: ChatRepositoryType;
   getNextStateUseCase: ApplicationGetNextState;
+  getLastAppliedStateUseCase: ApplicationGetLastAppliedState;
   applicationAnimationInProgressAdd: ApplicationAnimationInProgressAdd;
   applicationAnimationInProgressRemove: ApplicationAnimationInProgressRemove;
 
