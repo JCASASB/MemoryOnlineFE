@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { useMemo } from "react";
 import { usePlayer } from "../../hooks/usePlayer";
 
 const Wrapper = styled.div`

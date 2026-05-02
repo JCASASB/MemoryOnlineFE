@@ -2,12 +2,6 @@ import type { PlayerStats } from "../../ui/pages/innerPages/PlayerStats";
 import api from "./api"; // Tu instancia con interceptores
 import type { AxiosResponse } from "axios";
 
-// 1. Define tus interfaces de datos
-interface UserStats {
-  id: number;
-  name: string;
-}
-
 // 2. Crea el objeto con tus métodos
 export const apiService = {
   /*
