@@ -1,7 +1,6 @@
 export interface PlayerStats {
-  wins: number;
-  losses: number;
-  draws: number;
-  averageScore: number;
-  totalGames: number;
+  idUser: string;
+  totalMoves: number;
+  totalFails: number;
+  totalMatchs: number;
 }

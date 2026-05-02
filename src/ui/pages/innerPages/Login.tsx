@@ -4,8 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useDependencies } from "../../context/useDependencies";
-
-const LOGIN_URL = import.meta.env.VITE_LOGIN_URL + "/Auth/login";
+import { apiService } from "../../../infrastructure/api/apiService";
 
 const Page = styled.div`
   min-height: calc(100vh - 60px);
@@ -123,10 +122,7 @@ export const Login = () => {
     try {
       setIsSubmitting(true);
 
-      const response = await axios.post(LOGIN_URL, {
-        UserName: user.trim(),
-        Password: password,
-      });
+      const response = await apiService.loginUser(user, password);
 
       const data = response.data as {
         jbearer?: string;
@@ -143,6 +139,7 @@ export const Login = () => {
 
       onlineRepository.setAuthToken(token);
       onlineRepository.setPlayerName(user.trim());
+
       await Promise.all([
         onlineRepository.connectHub(),
         chatRepository.connect(),

@@ -48,19 +48,27 @@ export const Layout = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100dvh", // Altura dinámica para móviles
+        minHeight: "100dvh",
         width: "100vw",
-        overflow: "hidden",
       }}
     >
       <main
-        style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
+          paddingBottom: "calc(64px + env(safe-area-inset-bottom))",
+        }}
       >
         <Outlet />
       </main>
 
       <nav
         style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
@@ -68,6 +76,7 @@ export const Layout = () => {
           background: "#000",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom)",
+          zIndex: 11,
         }}
       >
         {navItems.map((item) => {

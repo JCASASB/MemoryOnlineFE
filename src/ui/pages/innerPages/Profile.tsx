@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../../hooks/usePlayer";
 import type { PlayerStats } from "./PlayerStats";
-
-const STATS_URL = import.meta.env.VITE_LOGIN_URL + "/api/profiles/stats"; // Tu URL de .NET
+import { apiService } from "../../../infrastructure/api/apiService";
 
 const ProfileWrapper = styled.div`
   display: flex;
@@ -88,18 +87,15 @@ const LogoutButton = styled.button`
 
 export const Profile = () => {
   const navigate = useNavigate();
-  const { playerName } = usePlayer();
+  const { playerId, playerName } = usePlayer();
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const playerId = playerName || ""; // Asegúrate de que playerName no sea undefined
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${STATS_URL}/${playerId}`);
-        if (!response.ok) throw new Error("Error en la petición");
-        const data = await response.json();
+        const response = await apiService.getUserStatsById(playerId);
+        const data = response.data;
         setStats(data);
       } catch (error) {
         console.error("Error cargando estadísticas del backend:", error);
@@ -108,10 +104,10 @@ export const Profile = () => {
       }
     };
 
-    if (playerName) {
+    if (playerId) {
       fetchStats();
     }
-  }, [playerName]);
+  }, [playerId]);
 
   const handleLogout = async () => {
     if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
@@ -137,25 +133,25 @@ export const Profile = () => {
 
       <StatGrid>
         <StatCard>
-          <StatValue $color="#4cd137">{stats?.wins || 0}</StatValue>
-          <StatLabel>Victorias</StatLabel>
+          <StatValue $color="#4cd137">{stats?.totalMoves || 0}</StatValue>
+          <StatLabel>Movimientos Totales</StatLabel>
         </StatCard>
 
         <StatCard>
-          <StatValue $color="#e84118">{stats?.losses || 0}</StatValue>
+          <StatValue $color="#e84118">{stats?.totalFails || 0}</StatValue>
           <StatLabel>Derrotas</StatLabel>
         </StatCard>
 
         <StatCard style={{ gridColumn: "span 2" }}>
           <StatValue $color="#00a8ff">
-            {stats?.averageScore.toFixed(1) || "0.0"}
+            {stats?.totalMatchs.toFixed(1) || "0.0"}
           </StatValue>
           <StatLabel>Promedio de Puntuación</StatLabel>
         </StatCard>
       </StatGrid>
 
       <div style={{ textAlign: "center", color: "#444", fontSize: "0.8rem" }}>
-        Total de partidas registradas: {stats?.totalGames || 0}
+        Total de partidas registradas: {stats?.totalMatchs || 0}
       </div>
 
       <LogoutButton onClick={handleLogout}>Cerrar Sesión</LogoutButton>

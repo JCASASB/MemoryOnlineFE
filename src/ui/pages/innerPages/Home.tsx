@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useMemo } from "react";
+import { usePlayer } from "../../hooks/usePlayer";
 
 const Wrapper = styled.div`
   display: flex;
@@ -26,19 +27,16 @@ const UserName = styled.span`
 `;
 
 export const Home = () => {
-  const userName = useMemo(
-    () => localStorage.getItem("playerName")?.trim() ?? "",
-    [],
-  );
+  const { playerName } = usePlayer();
 
   return (
     <Wrapper>
       <Title>Memory Online</Title>
       <Welcome>
         Bienvenido
-        {userName ? (
+        {playerName ? (
           <>
-            , <UserName>{userName}</UserName>
+            , <UserName>{playerName}</UserName>
           </>
         ) : (
           ""
