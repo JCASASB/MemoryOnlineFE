@@ -9,7 +9,6 @@ import { Chat } from "./ui/pages/innerPages/Chat";
 import { PrivateRoute } from "./ui/components/PrivateRoute";
 import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import PreventPullToRefresh from "./ui/PreventPullToRefresh";
 import { Profile } from "./ui/pages/innerPages/Profile";
 import { Layout } from "./ui/pages/layout/Layout";
 
@@ -33,26 +32,24 @@ function HandleExternalLinkRedirect() {
 
 function App() {
   return (
-    <PreventPullToRefresh>
-      <HashRouter>
-        <DependencyProvider>
-          <HandleExternalLinkRedirect />
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/login" element={<Login />} />
-              <Route element={<PrivateRoute />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/lobby" element={<GameLobby />} />
-                <Route path="/photos" element={<UploadPhotos />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/gameboard" element={<GameBoard />} />
-                <Route path="/profile" element={<Profile />} />
-              </Route>
+    <HashRouter>
+      <DependencyProvider>
+        <HandleExternalLinkRedirect />
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/login" element={<Login />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/lobby" element={<GameLobby />} />
+              <Route path="/photos" element={<UploadPhotos />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/gameboard" element={<GameBoard />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
-          </Routes>
-        </DependencyProvider>
-      </HashRouter>
-    </PreventPullToRefresh>
+          </Route>
+        </Routes>
+      </DependencyProvider>
+    </HashRouter>
   );
 }
 

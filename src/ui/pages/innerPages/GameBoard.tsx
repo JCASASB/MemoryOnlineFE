@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import PreventPullToRefresh from "../../PreventPullToRefresh";
 import styled from "styled-components";
 import { usePlayer } from "../../hooks/usePlayer";
 import { MemoryCard } from "../../components/card/MemoryCard";
@@ -75,29 +76,31 @@ export const GameBoard = () => {
   );
 
   return (
-    <BoardWrapper>
-      {/* Sección Fija Superior */}
-      <StickyHeader>
-        <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
-      </StickyHeader>
+    <PreventPullToRefresh>
+      <BoardWrapper>
+        {/* Sección Fija Superior */}
+        <StickyHeader>
+          <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
+        </StickyHeader>
 
-      {/* Sección con Scroll */}
-      {stateGame.players.length < 2 && (
-        <div style={{ textAlign: "center" }}>
-          <Header>Esperando jugador...</Header>
-        </div>
-      )}
+        {/* Sección con Scroll */}
+        {stateGame.players.length < 2 && (
+          <div style={{ textAlign: "center" }}>
+            <Header>Esperando jugador...</Header>
+          </div>
+        )}
 
-      <Grid $columns={columns}>
-        {stateGame.cards.map((card) => (
-          <MemoryCard
-            stateCard={card.state}
-            key={card.id}
-            {...card}
-            flip={stableFlip}
-          />
-        ))}
-      </Grid>
-    </BoardWrapper>
+        <Grid $columns={columns}>
+          {stateGame.cards.map((card) => (
+            <MemoryCard
+              stateCard={card.state}
+              key={card.id}
+              {...card}
+              flip={stableFlip}
+            />
+          ))}
+        </Grid>
+      </BoardWrapper>
+    </PreventPullToRefresh>
   );
 };
