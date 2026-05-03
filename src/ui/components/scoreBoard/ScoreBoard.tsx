@@ -5,7 +5,7 @@ import { Player } from "../player/Player";
 
 interface ScoreBoardProps {
   players: PlayerType[];
-  myPlayerName: string;
+  myPlayerId: string;
 }
 
 const Bar = styled.div`
@@ -53,15 +53,15 @@ const RightIcons = styled(IconList)`
 
 export const ScoreBoard: React.FC<ScoreBoardProps> = ({
   players,
-  myPlayerName,
+  myPlayerId,
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
   const orderedPlayers = useMemo(() => {
-    const meIndex = players.findIndex((p) => p.name === myPlayerName);
+    const meIndex = players.findIndex((p) => p.id === myPlayerId);
     if (meIndex === -1) return players;
     return [...players.slice(meIndex), ...players.slice(0, meIndex)];
-  }, [players, myPlayerName]);
+  }, [players, myPlayerId]);
 
   const togglePlayer = (id: string) =>
     setSelectedPlayerId((prev) => (prev === id ? null : id));
@@ -75,7 +75,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
           <LeftIcons key={player.id}>
             <Player
               player={player}
-              isMe={player.name === myPlayerName}
+              isMe={player.id === myPlayerId}
               isSelected={selectedPlayerId === player.id}
               onToggle={togglePlayer}
               dropdownAlign="left"
@@ -85,7 +85,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
           <RightIcons key={player.id}>
             <Player
               player={player}
-              isMe={player.name === myPlayerName}
+              isMe={player.id === myPlayerId}
               isSelected={selectedPlayerId === player.id}
               onToggle={togglePlayer}
               dropdownAlign="right"

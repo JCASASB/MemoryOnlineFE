@@ -86,7 +86,7 @@ const Button = styled.button`
 `;
 
 export const GameLobby = () => {
-  const { playerName, savePlayerName } = usePlayer();
+  const { playerName, playerId } = usePlayer();
   const location = useLocation();
   const initialSala = useMemo(() => {
     try {
@@ -110,9 +110,9 @@ export const GameLobby = () => {
     const trimmedUsuario = usuario.trim();
     if (!trimmedUsuario) return;
     const salaName = trimmedUsuario;
-    savePlayerName(trimmedUsuario);
+
     createGameUC(Number(nivel), salaName).then(() => {
-      joinGameUC(salaName, trimmedUsuario).then(() => {
+      joinGameUC(salaName, trimmedUsuario, playerId).then(() => {
         navigate(
           `/gameboard?level=${nivel}&gameName=${encodeURIComponent(salaName)}`,
         );
@@ -126,10 +126,9 @@ export const GameLobby = () => {
     const trimmedSala = sala.trim();
     const trimmedUsuario = usuario.trim();
     if (!trimmedSala || !trimmedUsuario) return;
-    savePlayerName(trimmedUsuario);
     navigate(`/gameboard?gameName=${encodeURIComponent(trimmedSala)}`);
     setTimeout(() => {
-      joinGameUC(trimmedSala, trimmedUsuario).catch((err) =>
+      joinGameUC(trimmedSala, trimmedUsuario, playerId).catch((err) =>
         console.error("Error joining game:", err),
       );
     }, 50);

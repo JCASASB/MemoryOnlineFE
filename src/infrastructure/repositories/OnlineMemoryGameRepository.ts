@@ -26,13 +26,12 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     this.hubUrl = hubUrl;
   }
 
-  getOrCreatePlayerId(): string {
-    let id = localStorage.getItem(this.PLAYER_ID_KEY);
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem(this.PLAYER_ID_KEY, id);
-    }
-    return id;
+  getPlayerId(): string {
+    return localStorage.getItem(this.PLAYER_ID_KEY) ?? "";
+  }
+
+  savePlayerId(id: string) {
+    localStorage.setItem(this.PLAYER_ID_KEY, id);
   }
 
   savePlayerName(name: string) {
@@ -266,10 +265,6 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
   setAuthToken(token: string): void {
     localStorage.setItem("auth-jbearer-token", token);
     this.authToken = token;
-  }
-
-  setPlayerName(user: string): void {
-    localStorage.setItem("playerName", user.trim());
   }
 
   getCurrentVersionGame(): number {

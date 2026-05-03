@@ -45,17 +45,17 @@ const Grid = styled.div<{ $columns: number }>`
 
 export const GameBoard = () => {
   console.log("Renderizando GameBoard");
-  const { playerName } = usePlayer();
+  const { playerId } = usePlayer();
   const { flipCardUC, checkCardsUC } = useUCs();
   const { stateGame } = useGameState();
 
-  const stableFlip = (id: string) => {
-    flipCardUC(id, playerName)
+  const stableFlip = (idCard: string) => {
+    flipCardUC(idCard, playerId)
       .then((versionNumber: number) => {
         checkCardsUC(versionNumber);
       })
       .catch((error) => {
-        console.error(`Error flipping card ${id}:`, error);
+        console.error(`Error flipping card ${idCard}:`, error);
       });
   };
 
@@ -69,7 +69,7 @@ export const GameBoard = () => {
       <BoardWrapper>
         {/* Sección Fija Superior */}
         <StickyHeader>
-          <ScoreBoard players={stateGame.players} myPlayerName={playerName} />
+          <ScoreBoard players={stateGame.players} myPlayerId={playerId} />
         </StickyHeader>
 
         {/* Sección con Scroll */}

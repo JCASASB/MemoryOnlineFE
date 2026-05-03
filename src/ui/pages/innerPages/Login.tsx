@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useDependencies } from "../../context/useDependencies";
 import { apiService } from "../../../infrastructure/api/apiService";
+import { jwtDecode } from "jwt-decode";
 
 const Page = styled.div`
   min-height: calc(100vh - 60px);
@@ -132,20 +133,28 @@ export const Login = () => {
 
       const token = data?.jbearer ?? data?.token ?? data?.authToken;
 
-      if (!token) {
+      if (token) {
+        try {
+          // 2. Decodificar el token
+          const decodedToken = jwtDecode(token);
+
+          onlineRepository.setAuthToken(token);
+          onlineRepository.savePlayerId(decodedToken.sub || user.trim());
+          onlineRepository.savePlayerName(user.trim());
+
+          await Promise.all([
+            onlineRepository.connectHub(),
+            chatRepository.connect(),
+          ]);
+
+          navigate("/");
+        } catch (error) {
+          console.error("Error al decodificar el token:", error);
+        }
+      } else {
         setError("La API no devolvio un token de autenticacion.");
         return;
       }
-
-      onlineRepository.setAuthToken(token);
-      onlineRepository.setPlayerName(user.trim());
-
-      await Promise.all([
-        onlineRepository.connectHub(),
-        chatRepository.connect(),
-      ]);
-
-      navigate("/");
     } catch (requestError) {
       if (axios.isAxiosError(requestError)) {
         const apiMessage =

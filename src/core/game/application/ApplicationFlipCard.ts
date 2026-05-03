@@ -7,17 +7,17 @@ export class ApplicationFlipCard {
     private readonly useCase: UseCaseFlipCard,
   ) {}
 
-  async execute(cardId: string, playerName: string): Promise<number> {
+  async execute(cardId: string, playerId: string): Promise<number> {
     const state = await this.repository.getLastStateFromQueue();
 
     if (!state) {
       throw new Error("Game state not found");
     }
 
-    const playerId = state.players.find((p) => p.name === playerName)?.id;
+    const player = state.players.find((p) => p.id === playerId);
 
-    if (!playerId) {
-      throw new Error(`Player with name ${playerName} not found in game state`);
+    if (!player) {
+      throw new Error(`Player with id ${playerId} not found in game state`);
     }
 
     const game = this.useCase.execute(state, cardId, playerId);

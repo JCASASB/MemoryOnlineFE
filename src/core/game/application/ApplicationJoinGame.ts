@@ -7,7 +7,11 @@ export class ApplicationJoinGame {
     private readonly useCase: UseCaseJoinMatch,
   ) {}
 
-  async execute(gameName: string, playerName: string): Promise<void> {
+  async execute(
+    gameName: string,
+    playerName: string,
+    playerId: string,
+  ): Promise<void> {
     const matchId = await this.repository.getMatchIdFromServer(gameName);
 
     await this.repository.setMatchId(matchId);
@@ -22,7 +26,7 @@ export class ApplicationJoinGame {
       throw new Error("Game state not found");
     }
 
-    const newState = this.useCase.execute(lastState, playerName);
+    const newState = this.useCase.execute(lastState, playerName, playerId);
 
     await this.repository.saveStateToQueue(newState);
 

@@ -24,8 +24,12 @@ export const useUCs = () => {
       [applicationCreateGame],
     ),
     joinGameUC: useCallback(
-      async (gameName: string, playerName: string) => {
-        return await applicationJoinGame.execute(gameName, playerName);
+      async (gameName: string, playerName: string, playerId: string) => {
+        return await applicationJoinGame.execute(
+          gameName,
+          playerName,
+          playerId,
+        );
       },
       [applicationJoinGame],
     ),
