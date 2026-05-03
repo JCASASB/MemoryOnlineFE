@@ -100,21 +100,17 @@ export const GameLobby = () => {
   const [tab, setTab] = useState<"crear" | "unirse">("crear");
   const [nivel, setNivel] = useState("3");
   const [sala, setSala] = useState(initialSala);
-  const [usuario, setUsuario] = useState(playerName);
   const navigate = useNavigate();
   const { createGameUC, joinGameUC } = useUCs();
 
   // Crear partida
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedUsuario = usuario.trim();
-    if (!trimmedUsuario) return;
-    const salaName = trimmedUsuario;
 
-    createGameUC(Number(nivel), salaName).then(() => {
-      joinGameUC(salaName, trimmedUsuario, playerId).then(() => {
+    createGameUC(Number(nivel), sala).then(() => {
+      joinGameUC(sala, playerName, playerId).then(() => {
         navigate(
-          `/gameboard?level=${nivel}&gameName=${encodeURIComponent(salaName)}`,
+          `/gameboard?level=${nivel}&gameName=${encodeURIComponent(sala)}`,
         );
       });
     });
@@ -124,11 +120,10 @@ export const GameLobby = () => {
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedSala = sala.trim();
-    const trimmedUsuario = usuario.trim();
-    if (!trimmedSala || !trimmedUsuario) return;
+    if (!trimmedSala) return;
     navigate(`/gameboard?gameName=${encodeURIComponent(trimmedSala)}`);
     setTimeout(() => {
-      joinGameUC(trimmedSala, trimmedUsuario, playerId).catch((err) =>
+      joinGameUC(trimmedSala, playerName, playerId).catch((err) =>
         console.error("Error joining game:", err),
       );
     }, 50);
@@ -147,11 +142,11 @@ export const GameLobby = () => {
       {tab === "crear" ? (
         <Form onSubmit={handleCreate}>
           <Label>
-            Hola {usuario}, quieres crear una sala?
+            Hola {playerName}, quieres crear una sala?
             <Input
               type="text"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
+              value={sala}
+              onChange={(e) => setSala(e.target.value)}
               maxLength={40}
               required
             />
@@ -181,16 +176,7 @@ export const GameLobby = () => {
               required
             />
           </Label>
-          <Label>
-            Tu nombre
-            <Input
-              type="text"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-              maxLength={40}
-              required
-            />
-          </Label>
+
           <Button type="submit">Unirse</Button>
         </Form>
       )}
