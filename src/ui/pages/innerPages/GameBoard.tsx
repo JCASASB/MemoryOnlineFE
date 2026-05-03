@@ -69,7 +69,11 @@ export const GameBoard = () => {
       <BoardWrapper>
         {/* Sección Fija Superior */}
         <StickyHeader>
-          <ScoreBoard players={stateGame.players} myPlayerId={playerId} />
+          <ScoreBoard
+            players={stateGame.players}
+            myPlayerId={playerId}
+            matchName={stateGame.name}
+          />
         </StickyHeader>
 
         {/* Sección con Scroll */}

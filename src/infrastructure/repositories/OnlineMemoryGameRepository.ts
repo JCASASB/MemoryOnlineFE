@@ -78,6 +78,11 @@ export class OnlineMemoryGameRepository implements GameRepositoryType {
     await this.hub.disconnect();
   }
 
+  async clearMatch(): Promise<void> {
+    await db.games.clear();
+    await db.settings.clear();
+  }
+
   async clearAll(): Promise<void> {
     try {
       if (this.hub) {

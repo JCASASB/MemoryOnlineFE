@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { usePlayer } from "../../hooks/usePlayer";
 import { useUCs } from "../../hooks/useUCs";
+import { useDependencies } from "../../context/useDependencies";
 
 const Wrapper = styled.div`
   display: flex;
@@ -87,25 +88,19 @@ const Button = styled.button`
 
 export const GameLobby = () => {
   const { playerName, playerId } = usePlayer();
-  const location = useLocation();
-  const initialSala = useMemo(() => {
-    try {
-      const params = new URLSearchParams(location.search);
-      return params.get("gameName") || "";
-    } catch (e) {
-      return "";
-    }
-  }, [location.search]);
+  const { onlineRepository } = useDependencies();
 
   const [tab, setTab] = useState<"crear" | "unirse">("crear");
   const [nivel, setNivel] = useState("3");
-  const [sala, setSala] = useState(initialSala);
+  const [sala, setSala] = useState("");
   const navigate = useNavigate();
   const { createGameUC, joinGameUC } = useUCs();
 
   // Crear partida
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
+
+    onlineRepository.clearMatch();
 
     createGameUC(Number(nivel), sala).then(() => {
       joinGameUC(sala, playerName, playerId).then(() => {
@@ -119,14 +114,14 @@ export const GameLobby = () => {
   // Unirse a partida
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedSala = sala.trim();
-    if (!trimmedSala) return;
-    navigate(`/gameboard?gameName=${encodeURIComponent(trimmedSala)}`);
-    setTimeout(() => {
-      joinGameUC(trimmedSala, playerName, playerId).catch((err) =>
-        console.error("Error joining game:", err),
-      );
-    }, 50);
+
+    onlineRepository.clearMatch();
+
+    joinGameUC(sala, playerName, playerId)
+      .catch((err) => console.error("Error joining game:", err))
+      .then(() => {
+        navigate(`/gameboard?gameName=${encodeURIComponent(sala)}`);
+      });
   };
 
   return (
@@ -146,7 +141,7 @@ export const GameLobby = () => {
             <Input
               type="text"
               value={sala}
-              onChange={(e) => setSala(e.target.value)}
+              onChange={(e) => setSala(e.target.value.toLowerCase().trim())}
               maxLength={40}
               required
             />
@@ -171,7 +166,7 @@ export const GameLobby = () => {
               type="text"
               placeholder="Ej: sala-1"
               value={sala}
-              onChange={(e) => setSala(e.target.value)}
+              onChange={(e) => setSala(e.target.value.toLowerCase().trim())}
               maxLength={40}
               required
             />

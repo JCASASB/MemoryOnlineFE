@@ -102,14 +102,6 @@ export const Login = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    try {
-      onlineRepository.clearAll();
-    } catch {
-      // no-op
-    }
-  }, [onlineRepository]);
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -182,7 +174,9 @@ export const Login = () => {
             id="user"
             type="text"
             value={user}
-            onChange={(event) => setUser(event.target.value)}
+            onChange={(event) =>
+              setUser(event.target.value.toLowerCase().trim())
+            }
             placeholder="tu_usuario"
             autoComplete="username"
           />
@@ -192,7 +186,9 @@ export const Login = () => {
             id="password"
             type="password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) =>
+              setPassword(event.target.value.toLowerCase().trim())
+            }
             placeholder="******"
             autoComplete="current-password"
           />

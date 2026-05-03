@@ -6,6 +6,7 @@ import { Player } from "../player/Player";
 interface ScoreBoardProps {
   players: PlayerType[];
   myPlayerId: string;
+  matchName: string;
 }
 
 const Bar = styled.div`
@@ -54,6 +55,7 @@ const RightIcons = styled(IconList)`
 export const ScoreBoard: React.FC<ScoreBoardProps> = ({
   players,
   myPlayerId,
+  matchName,
 }) => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
@@ -68,7 +70,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
 
   return (
     <Bar>
-      <Title>Memory - Hispalance</Title>
+      <Title>{matchName}</Title>
 
       {orderedPlayers.map((player, index) =>
         index / 2 === 0 ? (

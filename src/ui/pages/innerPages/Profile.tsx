@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { usePlayer } from "../../hooks/usePlayer";
 import type { PlayerStats } from "./PlayerStats";
 import { apiService } from "../../../infrastructure/api/apiService";
+import { useDependencies } from "../../context/useDependencies";
 
 const ProfileWrapper = styled.div`
   display: flex;
@@ -90,6 +91,7 @@ export const Profile = () => {
   const { playerId, playerName } = usePlayer();
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const { onlineRepository } = useDependencies();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -111,6 +113,8 @@ export const Profile = () => {
 
   const handleLogout = async () => {
     if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
+      await onlineRepository.clearAll();
+
       navigate("/login");
     }
   };

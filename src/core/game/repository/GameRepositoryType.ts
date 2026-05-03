@@ -20,6 +20,8 @@ export interface GameRepositoryType {
   removeAnimationInProgress(animationIds: string[]): Promise<void>;
   addAnimationInProgress(animationId: string): Promise<void>;
   areAnimationsInProgress(): boolean;
+  clearMatch(): Promise<void>;
+  clearAll(): Promise<void>;
 
   savePlayerName(name: string): void;
   getPlayerName(): string;
