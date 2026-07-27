@@ -19,7 +19,7 @@ export class ApplicationCheckCards {
 
       if (game) {
         const matchId = await this.repository.getMatchId();
-        await this.signalRService.sendUpdateStateGame(game, matchId);
+        this.signalRService.sendUpdateStateGame(game, matchId);
         await this.repository.saveStateToQueue(game);
       }
 
