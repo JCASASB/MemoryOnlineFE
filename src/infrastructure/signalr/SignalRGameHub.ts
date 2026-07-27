@@ -2,6 +2,7 @@ import * as signalR from "@microsoft/signalr";
 import { Game } from "../../core/game/domain/entities/Game";
 import type { ChatMessage } from "../../core/chat/domain/entities/ChatMessage";
 import type { Challenge } from "../../core/chat/domain/entities/Challenge";
+import type { ApplicationHubPort } from "../../core/domain/ports/GameHubPort";
 
 export class SignalRGameHub implements ApplicationHubPort {
   private static instance: SignalRGameHub | null = null;
