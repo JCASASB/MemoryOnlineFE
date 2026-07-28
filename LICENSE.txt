@@ -1,0 +1,7 @@
+Copyright (c) 2026 [hispalance]. Todos los derechos reservados.
+
+Queda estrictamente prohibida la reproducción, copia, modificación, distribución, 
+comercialización o uso de este código fuente, en todo o en parte, para cualquier 
+fin, sin el consentimiento previo y por escrito del titular de los derechos de autor.
+
+Este código se publica exclusivamente con fines de visualización y demostración de portafolio.
