@@ -1,16 +1,16 @@
 import "./App.css";
 import { DependencyProvider } from "./ui/context/DependencyContext";
-import { GameBoard } from "./ui/pages/innerPages/GameBoard";
-import { Home } from "./ui/pages/innerPages/Home";
-import { Login } from "./ui/pages/innerPages/Login";
+import { GameBoard } from "./ui/pages/innerPages/gameBoard/GameBoard";
+import { Home } from "./ui/pages/innerPages/home/Home";
+import { Login } from "./ui/pages/innerPages/login/Login";
 import { UploadPhotos } from "./ui/pages/innerPages/UploadPhotos";
-import { Chat } from "./ui/pages/innerPages/Chat";
+import { Chat } from "./ui/pages/innerPages/chat/Chat";
 import { PrivateRoute } from "./ui/components/PrivateRoute";
 import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { Profile } from "./ui/pages/innerPages/Profile";
 import { Layout } from "./ui/pages/layout/Layout";
-import { GameLobby } from "./ui/pages/innerPages/GameLobby";
+import { GameLobby } from "./ui/pages/innerPages/gameLobby/GameLobby";
+import { Profile } from "./ui/pages/innerPages/profile/Profile";
 
 function HandleExternalLinkRedirect() {
   const navigate = useNavigate();

@@ -1,31 +1,12 @@
+// GameLobby.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { usePlayer } from "../../hooks/usePlayer";
-import { useUCs } from "../../hooks/useUCs";
-import { useDependencies } from "../../context/useDependencies";
-import type { Challenge } from "../../../core/chat/domain/entities/Challenge";
-import { ItemChallenge } from "../../components/itemChallenge/ItemChallenge";
-
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 16px;
-  min-height: calc(100vh - 60px);
-  gap: 32px;
-`;
-
-const Title = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-`;
-
-const EmptyMessage = styled.p`
-  color: #888;
-  font-size: 1rem;
-`;
+import { usePlayer } from "../../../hooks/usePlayer";
+import { useUCs } from "../../../hooks/useUCs";
+import { useDependencies } from "../../../context/useDependencies";
+import type { Challenge } from "../../../../core/chat/domain/entities/Challenge";
+import { ItemChallenge } from "../../../components/itemChallenge/ItemChallenge";
+import * as S from "./GameLobby.styles"; // <-- Importación de los estilos agregada
 
 export const GameLobby = () => {
   const { playerName, playerId } = usePlayer();
@@ -60,12 +41,14 @@ export const GameLobby = () => {
   };
 
   return (
-    <Wrapper>
-      <Title>Desafíos pendientes</Title>
+    <S.Wrapper>
+      <S.Title>Desafíos pendientes</S.Title>
       {challenges.length === 0 ? (
-        <EmptyMessage>No hay desafíos disponibles por el momento.</EmptyMessage>
+        <S.EmptyMessage>
+          No hay desafíos disponibles por el momento.
+        </S.EmptyMessage>
       ) : (
-        <ChallengeList>
+        <S.ChallengeList>
           {challenges.map((challenge) => (
             <ItemChallenge
               key={challenge.id}
@@ -74,19 +57,8 @@ export const GameLobby = () => {
               handleJoin={handleJoin}
             />
           ))}
-        </ChallengeList>
+        </S.ChallengeList>
       )}
-    </Wrapper>
+    </S.Wrapper>
   );
 };
-
-const ChallengeList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;

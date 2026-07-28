@@ -1,75 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-import type { ChatMessage } from "../../../core/chat/domain/entities/ChatMessage";
-import { ChatMessage as ChatMessageBubble } from "../../components/chatMessage/ChatMessage";
-import { useDependencies } from "../../context/useDependencies";
-import { usePlayer } from "../../hooks/usePlayer";
-import { useUCs } from "../../hooks/useUCs";
-
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  min-height: calc(100vh - 60px);
-  padding: 20px;
-  box-sizing: border-box;
-  gap: 16px;
-`;
-
-const Title = styled.h1`
-  margin: 0;
-`;
-
-const Messages = styled.div`
-  flex: 1;
-  min-height: 220px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  background: #f7f7f7;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const Input = styled.textarea`
-  min-height: 60px;
-  resize: vertical;
-  padding: 12px;
-  border-radius: 10px;
-  border: 2px solid #ccc;
-  font-size: 1rem;
-  font-family: inherit;
-`;
-
-const Button = styled.button`
-  width: fit-content;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  background: #333;
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const Message = styled.p<{ $error?: boolean }>`
-  margin: 0;
-  color: ${({ $error }) => ($error ? "#b00020" : "#1f7a1f")};
-`;
+import type { ChatMessage } from "../../../../core/chat/domain/entities/ChatMessage";
+import { ChatMessage as ChatMessageBubble } from "../../../components/chatMessage/ChatMessage";
+import { useDependencies } from "../../../context/useDependencies";
+import { usePlayer } from "../../../hooks/usePlayer";
+import { useUCs } from "../../../hooks/useUCs";
+import {
+  Wrapper,
+  Title,
+  Messages,
+  Form,
+  Input,
+  Button,
+  Message,
+} from "./Chat.styles";
 
 type UIMessage = {
   id: string;
