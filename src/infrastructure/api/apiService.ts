@@ -1,4 +1,4 @@
-import type { PlayerStats } from "../../ui/pages/innerPages/PlayerStats";
+import type { PlayerStats } from "../../ui/pages/innerPages/profile/PlayerStats";
 import api from "./api"; // Tu instancia con interceptores
 import type { AxiosResponse } from "axios";
 
