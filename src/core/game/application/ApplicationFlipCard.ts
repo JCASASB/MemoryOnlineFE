@@ -27,7 +27,7 @@ export class ApplicationFlipCard {
     if (game) {
       await this.repository.saveStateToQueue(game);
       const matchId = await this.repository.getMatchId();
-      await this.signalRService.sendUpdateStateGame(game, matchId);
+      this.signalRService.sendUpdateStateGame(game, matchId);
       return game.version;
     } else {
       return state.version;
