@@ -2,9 +2,10 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { env } from "../../ui/utils/HelperConfigs";
 
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: env.apiUrl(),
 });
 
 // Interceptor de petición

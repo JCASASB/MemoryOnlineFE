@@ -8,8 +8,7 @@ import { apiService } from "../../../../infrastructure/api/apiService";
 import { jwtDecode } from "jwt-decode";
 import { SignalRGameHub } from "../../../../infrastructure/signalr/SignalRGameHub";
 import * as S from "./Login.styles"; // <-- Importación de los estilos agregada
-
-const SIGNALR_HUB_URL = import.meta.env.VITE_SIGNALR_HUB_URL;
+import { env } from "../../../utils/HelperConfigs";
 
 export const Login = () => {
   const { onlineRepository } = useDependencies();
@@ -51,7 +50,7 @@ export const Login = () => {
           onlineRepository.savePlayerId(decodedToken.sub || user.trim());
           onlineRepository.savePlayerName(user.trim());
 
-          SignalRGameHub.setCredentials(SIGNALR_HUB_URL, token);
+          SignalRGameHub.setCredentials(env.signalRHubUrl(), token);
           SignalRGameHub.initializeInstance();
 
           navigate("/");
@@ -115,7 +114,7 @@ export const Login = () => {
           </S.Button>
         </form>
 
-        <S.Version>v{__APP_VERSION__}</S.Version>
+        <S.Version>v{env.appVersion()}</S.Version>
       </S.Card>
     </S.Page>
   );
